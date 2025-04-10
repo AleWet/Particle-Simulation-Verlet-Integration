@@ -59,7 +59,7 @@ The parameters cannot be modified at runtime. Modify them in the source code and
 Physics constants can be modified in Constants.h and their implementation file.
 
 ## Known Issues & Limitations
-- **Performance Limit:** The simulation struggles with more than **7500 particles** with 8 substeps.
+- **Performance Limit:** The simulation struggles with more than **7500 particles** with 8 substeps (with debugger).
 - Particles aren't stable when stacked on top of each other.
 
 ## Contribution
