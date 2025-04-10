@@ -1,4 +1,4 @@
-# Particle Simulator using Verlet Integration (C++ / OpenGL)
+# Particle Simulation using Verlet Integration 
 
 ## Overview
 A lightweight C++ particle simulator built with OpenGL, designed to simulate basic physics interactions using Verlet integration. 
@@ -33,7 +33,15 @@ Before running the simulator, ensure the following settings are correctly config
 - **Library Directories:**
   - `$(SolutionDir)Dependencies\glfw-3.4.bin.WIN32\lib-vc2022`
   - `$(SolutionDir)Dependencies\glew-2.1.0\lib\Release\Win32`
-- **Windows only** (due to Windows.h dependency)
+- **Additional Dependencies:**
+  - `glfw3.lib`
+  - `glew32s.lib`
+  - `opengl32.lib`
+  - `user32.lib`
+  - `gdi32.lib`
+  - `shell32.lib`
+- **Preprocessor Definitions:**
+  - `GLEW_STATIC`
 
 ### 2. Build & Run
   **Current Supported Configuration**:
