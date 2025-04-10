@@ -19,12 +19,16 @@ struct Bounds {
 class SimulationSystem
 {
 private:
+    // Basic
     Bounds m_Bounds;
     float m_ParticleRadius;
-    float m_Zoom;
     float m_SimHeight;
     float m_SimWidth;
     unsigned int m_subSteps;
+
+    // Camera
+    float m_Zoom;
+    Vec2 m_CameraPosition;
 
     unsigned int m_CurrentNumOfParticles;
     bool m_IsSpaceBarPressed;
@@ -36,7 +40,7 @@ private:
     std::vector<Vec2> m_Accelerations;
     std::vector<float> m_Masses;
 
-    // Not implented
+    // Not implented yet
     std::vector<float> m_Temperatures;
     std::vector<float> m_Densities;
     std::vector<float> m_Pressures;
@@ -55,7 +59,7 @@ private:
 
     std::vector<ParticleStream> m_Streams;
 
-    // Add SpatialGrid as a member
+    // SpatialGrid
     SpatialGrid m_SpatialGrid;
     bool m_SpatialGridInitialized;
 
@@ -161,6 +165,15 @@ public:
 
     // Set if simulation is paused with p button
     void SetIsPaused(bool v) { m_IsPaused = v; }
+
+    // Get camera position
+    const Vec2& GetCameraPosition() const { return m_CameraPosition; }
+
+    // Set camera position
+    void SetCameraPosition(const Vec2& position) { m_CameraPosition = position; }
+
+    // Move camera by offset
+    void MoveCamera(const Vec2& offset) { m_CameraPosition += offset; }
 
     // Get spatial grid 
     SpatialGrid& GetSpatialGrid() { return m_SpatialGrid; }

@@ -49,7 +49,7 @@ void main()
     float circleShape = 1.0 - smoothstep(0.9, 1.0, distance);
 
     float speed = length(v_Velocity);
-    float normalizedV = min(speed / 50.0, 1.0);
+    float normalizedV = min(speed / 25.0, 1.0);
 
     vec3 colorRGB;
     if (normalizedV < 0.25) {

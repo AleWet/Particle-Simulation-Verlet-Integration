@@ -179,6 +179,8 @@ void UpdateWindowTitle(GLFWwindow* window, const Time& timeManager, unsigned int
 
 void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
 {
+    // Previous key handling code remains the same
+
     // Close window on ESC key press
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -195,6 +197,34 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     {
         sim.SetZoom(sim.GetZoom() * (1.0f + 0.001));
     }
+
+    // Handle camera movement with arrow keys
+    float cameraSpeed = 100.0f * deltaTime / sim.GetZoom();
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        sim.MoveCamera({ 0.0f, cameraSpeed });
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        sim.MoveCamera({ 0.0f, -cameraSpeed });
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    {
+        sim.MoveCamera({ cameraSpeed, 0.0f });
+    }
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    {
+        sim.MoveCamera({ -cameraSpeed, 0.0f });
+    }
+
+    // Reset camera position with R key
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    {
+        sim.SetCameraPosition({ 0.0f, 0.0f });
+    }
+
+    // Space key handling
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     {
         if (!spaceKeyPressed) {
@@ -211,9 +241,8 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     // Only toggle pause state on key press, not while holding
     bool isPCurrentlyPressed = glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS;
     if (isPCurrentlyPressed && !pKeyPressed) {
-        // Toggle pause state only on the transition from released to pressed
         sim.SetIsPaused(!sim.GetIsPaused());
         std::cout << "Pause toggled: " << (sim.GetIsPaused() ? "Paused" : "Unpaused") << std::endl;
     }
-    pKeyPressed = isPCurrentlyPressed; // Update previous state for next frame
+    pKeyPressed = isPCurrentlyPressed; 
 }

@@ -29,9 +29,9 @@
 // ======================= SIMULATION PARAMETERS =======================
 
 const float fixedDeltaTime = 1.0f / 60.0f;
-const unsigned int subSteps = 2;            
+const unsigned int subSteps = 8;            
 
-const unsigned int totalNumberOfParticles = 4000;
+const unsigned int totalNumberOfParticles = 3000;
 const float particleRadius = 5.0f;
 
 const float zoom = 0.6f;
@@ -43,8 +43,8 @@ const Vec2 topRight(simWidth / 2, simHeight / 2);
 const glm::vec4 simBorderColor(1.0f, 1.0f, 1.0f, 0.5f); // White
 const float borderWidth = 2.0f;
 
-const float streamSpeed = 17.0f;
-const Vec2 initialParticleSpeed = { 100.0f, 0.0f };
+const float streamSpeed = 18.0f;
+const Vec2 initialParticleSpeed = { 200.0f, 0.0f };
 
 // physics constants are in the Constants.cpp file in the physics folder
 // =====================================================================

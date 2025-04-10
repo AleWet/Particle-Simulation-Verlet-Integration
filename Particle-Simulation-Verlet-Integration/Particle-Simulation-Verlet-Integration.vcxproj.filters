@@ -1396,5 +1396,19 @@
     <None Include="src\vendor\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="res\shaders\Basic.shader" />
+    <None Include="res\shaders\BorderShader.shader" />
+    <None Include="res\shaders\ParticleShader.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\textures\dirtBlockTexture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\obsidianLogo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\textures\obsidianLogoNoBg.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

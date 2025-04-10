@@ -3,11 +3,13 @@
 
 unsigned long long int particleIndex = 0;
 
-SimulationSystem::SimulationSystem(unsigned int numberOfParticles, const Vec2& bottomLeft, const Vec2& topRight, float particleRadius, const unsigned int substeps)
+SimulationSystem::SimulationSystem(unsigned int numberOfParticles, const Vec2& bottomLeft, const Vec2& topRight, 
+    float particleRadius, 
+    const unsigned int substeps)
     : m_Bounds({ bottomLeft, topRight }), m_ParticleRadius(particleRadius), m_Zoom(1.0f), m_subSteps(substeps),
     m_IsSpaceBarPressed(false), m_IsPaused(false), m_CurrentNumOfParticles(0),
     m_SpatialGrid(numberOfParticles, particleRadius, bottomLeft, topRight),
-    m_SpatialGridInitialized(false)
+    m_SpatialGridInitialized(false), m_CameraPosition(0.0f, 0.0f) 
 {
     m_SimHeight = std::abs(topRight.y - bottomLeft.y);
     m_SimWidth = std::abs(topRight.x - bottomLeft.x);
@@ -89,11 +91,11 @@ glm::mat4 SimulationSystem::GetViewMatrix() const
     // Create view transformation matrix
     glm::mat4 view = glm::mat4(1.0f);
 
-    // Center the view on the simulation area
+    // Center the view on the simulation area and apply camera offset
     view = glm::translate(view, glm::vec3(
-        -simulationCenter.x,  // Center X
-        -simulationCenter.y,  // Center Y
-        0.0f                  // Z remains unchanged
+        -simulationCenter.x - m_CameraPosition.x,  // Center X with camera offset
+        -simulationCenter.y - m_CameraPosition.y,  // Center Y with camera offset
+        0.0f                                       // Z remains unchanged
     ));
 
     return view;
