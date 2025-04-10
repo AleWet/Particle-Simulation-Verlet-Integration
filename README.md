@@ -45,6 +45,8 @@ Before running the simulator, ensure the following settings are correctly config
 - Z to zoom out
 - X to zoom in
 - P to pause
+- ARROW KEYS to move the camera
+- R to reset camera movement
 - Spacebar to Apply a central force to all particles (press and hold)
 - Simulation parameters must be set **before compilation** within the `application.cpp` file under **SIMULATION PARAMETERS**:
 ```cpp
