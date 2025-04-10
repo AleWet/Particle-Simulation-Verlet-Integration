@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/714e0c63-ab89-45f4-a1ce-977b144f5522
 ## Features
 - **Verlet Integration** for physics calculations
 - **Space Partitioning** 
-- **instance rendering** 
+- **Instance Rendering** 
 - **Customizable Simulation Parameters** (set before compilation)
 - **GLFW & GLEW for OpenGL rendering**
 - **GLM for mathematical computations** (on top of a custom math library)
