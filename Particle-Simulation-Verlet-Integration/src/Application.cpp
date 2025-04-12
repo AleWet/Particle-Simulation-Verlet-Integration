@@ -6,7 +6,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <windows.h>
 
 #include "Renderer.h"
 
@@ -25,14 +24,13 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 
-
 // ======================= SIMULATION PARAMETERS =======================
 
 const float fixedDeltaTime = 1.0f / 60.0f;
 const unsigned int subSteps = 8;            
 
-const unsigned int totalNumberOfParticles = 3000;
-const float particleRadius = 5.0f;
+const unsigned int totalNumberOfParticles = 17000;
+const float particleRadius = 3.5f;
 
 const float zoom = 0.6f;
 const float simWidth = 1000.0f;

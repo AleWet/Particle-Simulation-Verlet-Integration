@@ -6,7 +6,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <windows.h>
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"

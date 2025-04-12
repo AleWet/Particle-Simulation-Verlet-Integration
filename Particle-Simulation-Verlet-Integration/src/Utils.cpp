@@ -179,8 +179,6 @@ void UpdateWindowTitle(GLFWwindow* window, const Time& timeManager, unsigned int
 
 void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
 {
-    // Previous key handling code remains the same
-
     // Close window on ESC key press
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
