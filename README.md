@@ -56,7 +56,8 @@ Before running the simulator, ensure the following settings are correctly config
 - ARROW KEYS to move the camera
 - R to reset camera movement
 - Spacebar to apply a central force to all particles (press and hold)
-- Mouse Left Click to apply a force centered on the cursor
+- Mouse Left Click to apply an attractive force centered on the cursor
+- Mouse Right Click to apply a repuslive force centerd on the cursor
 - Simulation parameters must be set **before compilation** within the `application.cpp` file under **SIMULATION PARAMETERS**:
 ```cpp
 // Simulation parameters
