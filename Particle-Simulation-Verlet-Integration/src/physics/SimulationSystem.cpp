@@ -3,13 +3,14 @@
 
 unsigned long long int particleIndex = 0;
 
-SimulationSystem::SimulationSystem(unsigned int numberOfParticles, const Vec2& bottomLeft, const Vec2& topRight, 
-    float particleRadius, 
+SimulationSystem::SimulationSystem(unsigned int numberOfParticles, const Vec2& bottomLeft, const Vec2& topRight,
+    float particleRadius,
     const unsigned int substeps)
     : m_Bounds({ bottomLeft, topRight }), m_ParticleRadius(particleRadius), m_Zoom(1.0f), m_subSteps(substeps),
-    m_IsSpaceBarPressed(false), m_IsPaused(false), m_CurrentNumOfParticles(0),
+    m_IsSpaceBarPressed(false), m_IsPaused(false), m_IsLeftButtonClicked(false),
+    m_CurrentNumOfParticles(0),
     m_SpatialGrid(numberOfParticles, particleRadius, bottomLeft, topRight),
-    m_SpatialGridInitialized(false), m_CameraPosition(0.0f, 0.0f) 
+    m_SpatialGridInitialized(false), m_CameraPosition(0.0f, 0.0f)
 {
     m_SimHeight = std::abs(topRight.y - bottomLeft.y);
     m_SimWidth = std::abs(topRight.x - bottomLeft.x);
@@ -37,13 +38,13 @@ void SimulationSystem::AddParticle(const Vec2& position, const Vec2& velocity, c
     m_Pressures.push_back(0.0f);     // Default pressure
 }
 
-void SimulationSystem::Update(float deltaTime, bool isSpaceBarPressed)
+void SimulationSystem::Update(float deltaTime)
 {
     // Update particle streams
     UpdateStreams(deltaTime);
 
     // Solve physics (apply forces, update positions, handle collisions)
-    SolvePhysics(*this, deltaTime, isSpaceBarPressed);
+    SolvePhysics(*this, deltaTime, GetIsSpaceBarPressed(), GetIsMouseLeftClicked());
 }
 
 glm::mat4 SimulationSystem::GetProjMatrix() const

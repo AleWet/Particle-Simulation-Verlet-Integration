@@ -26,13 +26,14 @@ private:
     float m_SimWidth;
     unsigned int m_subSteps;
 
-    // Camera
-    float m_Zoom;
+    // Camera, Input, Display
     Vec2 m_CameraPosition;
-
+    Vec2 m_MousePos;
+    float m_Zoom;
     unsigned int m_CurrentNumOfParticles;
     bool m_IsSpaceBarPressed;
     bool m_IsPaused;
+    bool m_IsLeftButtonClicked;
 
     // SoA approach
     std::vector<Vec2> m_Positions;
@@ -70,8 +71,7 @@ public:
     void AddParticle(const Vec2& position, const Vec2& velocity, const Vec2& acceleration, float mass);
 
     // Update simulation physics
-    void Update(float deltaTime, bool isSpaceBarPressed);
-
+    void Update(float deltaTime);
 
     // SoA accessors
     const std::vector<Vec2>& GetPositions() const { return m_Positions; }
@@ -175,10 +175,27 @@ public:
     // Move camera by offset
     void MoveCamera(const Vec2& offset) { m_CameraPosition += offset; }
 
-    // Get spatial grid 
+    // Getters for spatial grid 
     SpatialGrid& GetSpatialGrid() { return m_SpatialGrid; }
     const SpatialGrid& GetSpatialGrid() const { return m_SpatialGrid; }
 
     // Initialize or update the spatial grid
     void UpdateSpatialGrid();
+
+    // Get mouse position, set to {-1, -1} if mouse is outside of simulation window
+    const Vec2 GetMousePosition() const { return m_MousePos; }
+
+    // Set mouse position
+    void SetMousePosition(double mousePosX, double mousePosY) 
+    {
+        m_MousePos.x = mousePosX;
+        m_MousePos.y = mousePosY;
+    }
+
+    // Set if mouse LEFT click is down
+    bool GetIsMouseLeftClicked() const { return m_IsLeftButtonClicked; }
+
+    // Get if mouse right click is down
+    void SetIsMouseLeftClicked(bool isClicked) { m_IsLeftButtonClicked = isClicked; }
+
 };

@@ -177,14 +177,51 @@ void UpdateWindowTitle(GLFWwindow* window, const Time& timeManager, unsigned int
     glfwSetWindowTitle(window, title.c_str());
 }
 
+void UpdateMousePosition(GLFWwindow* window, SimulationSystem& sim) 
+{
+   // Update mouse position
+   double cursorX, cursorY;
+   glfwGetCursorPos(window, &cursorX, &cursorY);
+
+   int windowWidth, windowHeight;
+   glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+   // Normalize cursor position to [-1, 1]
+   float normalizedX = (2.0f * cursorX / windowWidth) - 1.0f;
+   float normalizedY = 1.0f - (2.0f * cursorY / windowHeight);
+
+   // Map normalized position to simulation coordinates
+   glm::vec4 cursorPosNormalized(normalizedX, normalizedY, 0.0f, 1.0f);
+   glm::vec4 cursorSimPos = glm::inverse(sim.GetProjMatrix() * sim.GetViewMatrix()) * cursorPosNormalized;
+
+   // Check if the mouse is inside the simulation bounds
+   const Bounds bounds = sim.GetBounds();
+   if (cursorSimPos.x < bounds.bottomLeft.x || cursorSimPos.x > bounds.topRight.x ||
+       cursorSimPos.y < bounds.bottomLeft.y || cursorSimPos.y > bounds.topRight.y) 
+   {
+       // Set mouse position to {-1, -1} if outside bounds
+       sim.SetMousePosition(-1.0, -1.0);
+   } 
+   else 
+   {
+       // Update the mouse position in the simulation system
+       sim.SetMousePosition(cursorSimPos.x, cursorSimPos.y);
+   }
+}
+
 void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
 {
     // Close window on ESC key press
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    // Helper function 
+    UpdateMousePosition(window, sim);
+
     static bool spaceKeyPressed = false;
-    static bool pKeyPressed = false; // Track P key state
+    static bool pKeyPressed = false; 
+    static bool leftMousePressed = false;
+
 
     // Z/X keys to adjust zoom
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
@@ -234,6 +271,20 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     {
         spaceKeyPressed = false;
         sim.SetIsSpaceBarPressed(spaceKeyPressed);
+    }
+
+    // Mouse click handling 
+    if ((glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS))
+    {
+        if (!leftMousePressed) {
+            leftMousePressed = true;
+            sim.SetIsMouseLeftClicked(leftMousePressed);
+        }
+    }
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+    {
+        leftMousePressed = false;
+        sim.SetIsMouseLeftClicked(leftMousePressed);
     }
 
     // Only toggle pause state on key press, not while holding

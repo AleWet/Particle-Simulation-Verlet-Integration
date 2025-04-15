@@ -141,10 +141,11 @@ int main(void)
             {
                 int steps = timeManager.update();
                 for (int i = 0; i < steps; i++)
-                    sim.Update(timeManager.getFixedDeltaTime(), sim.GetIsSpaceBarPressed());
+                    sim.Update(timeManager.getFixedDeltaTime());
             }
             
-            // Process user input (esc -> close window, z/x -> control zoom)
+            // Process user input 
+            
             ProcessInput(window, sim, timeManager.getFixedDeltaTime());
 
             GLCall(glClear(GL_COLOR_BUFFER_BIT));
