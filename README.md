@@ -5,7 +5,7 @@ A lightweight C++ particle simulator built with OpenGL, designed to simulate bas
 
 
 
-https://github.com/user-attachments/assets/714e0c63-ab89-45f4-a1ce-977b144f5522
+https://github.com/user-attachments/assets/eddf0975-4d7c-405f-9e6f-a205fee8867f
 
 
 
@@ -55,7 +55,8 @@ Before running the simulator, ensure the following settings are correctly config
 - P to pause
 - ARROW KEYS to move the camera
 - R to reset camera movement
-- Spacebar to Apply a central force to all particles (press and hold)
+- Spacebar to apply a central force to all particles (press and hold)
+- Mouse Left Click to apply a force centered on the cursor
 - Simulation parameters must be set **before compilation** within the `application.cpp` file under **SIMULATION PARAMETERS**:
 ```cpp
 // Simulation parameters
