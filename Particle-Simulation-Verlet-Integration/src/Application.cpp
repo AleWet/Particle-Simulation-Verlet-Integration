@@ -145,7 +145,6 @@ int main(void)
             }
             
             // Process user input 
-            
             ProcessInput(window, sim, timeManager.getFixedDeltaTime());
 
             GLCall(glClear(GL_COLOR_BUFFER_BIT));

@@ -7,7 +7,7 @@ SimulationSystem::SimulationSystem(unsigned int numberOfParticles, const Vec2& b
     float particleRadius,
     const unsigned int substeps)
     : m_Bounds({ bottomLeft, topRight }), m_ParticleRadius(particleRadius), m_Zoom(1.0f), m_subSteps(substeps),
-    m_IsSpaceBarPressed(false), m_IsPaused(false), m_IsLeftButtonClicked(false),
+    m_IsSpaceBarPressed(false), m_IsPaused(false), m_IsLeftButtonClicked(false), m_IsRightButtonClicked(false),
     m_CurrentNumOfParticles(0),
     m_SpatialGrid(numberOfParticles, particleRadius, bottomLeft, topRight),
     m_SpatialGridInitialized(false), m_CameraPosition(0.0f, 0.0f)
@@ -44,7 +44,7 @@ void SimulationSystem::Update(float deltaTime)
     UpdateStreams(deltaTime);
 
     // Solve physics (apply forces, update positions, handle collisions)
-    SolvePhysics(*this, deltaTime, GetIsSpaceBarPressed(), GetIsMouseLeftClicked());
+    SolvePhysics(*this, deltaTime, GetIsSpaceBarPressed(), GetIsMouseLeftClicked(), GetIsMouseRightClicked());
 }
 
 glm::mat4 SimulationSystem::GetProjMatrix() const

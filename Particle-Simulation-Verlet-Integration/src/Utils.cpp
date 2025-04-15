@@ -221,6 +221,7 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     static bool spaceKeyPressed = false;
     static bool pKeyPressed = false; 
     static bool leftMousePressed = false;
+    static bool rightMousePressed = false;
 
 
     // Z/X keys to adjust zoom
@@ -273,7 +274,7 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
         sim.SetIsSpaceBarPressed(spaceKeyPressed);
     }
 
-    // Mouse click handling 
+    // Mouse LEFT click handling 
     if ((glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS))
     {
         if (!leftMousePressed) {
@@ -285,6 +286,20 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     {
         leftMousePressed = false;
         sim.SetIsMouseLeftClicked(leftMousePressed);
+    }
+
+    // Mouse RIGHT click handling 
+    if ((glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS))
+    {
+        if (!rightMousePressed) {
+            rightMousePressed = true;
+            sim.SetIsMouseRightClicked(rightMousePressed);
+        }
+    }
+    else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE)
+    {
+        rightMousePressed = false;
+        sim.SetIsMouseRightClicked(rightMousePressed);
     }
 
     // Only toggle pause state on key press, not while holding

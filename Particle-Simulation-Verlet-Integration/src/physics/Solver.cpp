@@ -11,7 +11,8 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
     Vec2 simCenter,
     Vec2 mousePos,
     bool isSpaceBarPressed,
-    bool isLeftClickPressed) {
+    bool isLeftClickPressed,
+    bool isRightClickPressed) {
 
     for (size_t i = start; i < end; i++) 
     {
@@ -60,6 +61,30 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
             }
         }
 
+        // Use right click functionality only if left click is not already pressed
+        if (!isLeftClickPressed && (isRightClickPressed && mousePos != nullVec))
+        {
+            // Calculate direction vector from particle to mouse position
+            Vec2 toMouse = mousePos - positions[i];
+
+            // Get the squared distance
+            float distSq = toMouse.length_sq();
+
+            // Only affect particles within a certain range
+
+            if (distSq > 0.01f && distSq < MAX_FORCE_DISTANCE_SQ) {
+                // Normalize direction vector
+                Vec2 direction = toMouse.normalized();
+
+                // REPULSIVE Force decreases with distance but not too much 
+                float forceMagnitude = LEFT_CLICK_FORCE_COEFFICIENT / (1.0f + sqrt(distSq) * 0.01f) * (-1.0f);
+
+                // Apply force towards mouse position
+                Vec2 force = direction * forceMagnitude;
+                accelerations[i] += force / masses[i];
+            }
+        }
+
         // Calculate current velocity
         Vec2 velocity = (positions[i] - prevPositions[i]) / subStepDt;
 
@@ -91,7 +116,7 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
     }
 }
 
-void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed, bool isLeftClickPressed) 
+void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed, bool isLeftClickPressed, bool isRightClickPressed) 
 {
     // Get references to SoA data
     std::vector<Vec2>& positions = sim.GetPositions();
@@ -116,7 +141,7 @@ void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed
 
                 threads.emplace_back(UpdateParticles, start, end, subStepDt,
                     std::ref(positions), std::ref(prevPositions), std::ref(accelerations),
-                    std::cref(masses), sim.GetSimCenter(), sim.GetMousePosition(), isSpaceBarPressed, isLeftClickPressed);
+                    std::cref(masses), sim.GetSimCenter(), sim.GetMousePosition(), isSpaceBarPressed, isLeftClickPressed, isRightClickPressed);
             }
 
             for (auto& t : threads) t.join();

@@ -34,6 +34,7 @@ private:
     bool m_IsSpaceBarPressed;
     bool m_IsPaused;
     bool m_IsLeftButtonClicked;
+    bool m_IsRightButtonClicked;
 
     // SoA approach
     std::vector<Vec2> m_Positions;
@@ -195,7 +196,13 @@ public:
     // Set if mouse LEFT click is down
     bool GetIsMouseLeftClicked() const { return m_IsLeftButtonClicked; }
 
-    // Get if mouse right click is down
+    // Get if mouse LEFT click is down
     void SetIsMouseLeftClicked(bool isClicked) { m_IsLeftButtonClicked = isClicked; }
+
+    // Set if mouse RIGHT click is down
+    bool GetIsMouseRightClicked() const { return m_IsRightButtonClicked; }
+
+    // Get if mouse RIGHT click is down
+    void SetIsMouseRightClicked(bool isClicked) { m_IsRightButtonClicked = isClicked; }
 
 };
