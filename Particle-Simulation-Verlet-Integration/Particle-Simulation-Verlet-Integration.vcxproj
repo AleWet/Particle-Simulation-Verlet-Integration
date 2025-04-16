@@ -347,6 +347,8 @@
     <None Include="res\shaders\Basic.shader" />
     <None Include="res\shaders\BorderShader.shader" />
     <None Include="res\shaders\ParticleShader.shader" />
+    <None Include="res\shaders\ParticleShaderTemperature.shader" />
+    <None Include="res\shaders\ParticleShaderVelocity.shader" />
     <None Include="src\vendor\glm\detail\func_common.inl" />
     <None Include="src\vendor\glm\detail\func_common_simd.inl" />
     <None Include="src\vendor\glm\detail\func_exponential.inl" />

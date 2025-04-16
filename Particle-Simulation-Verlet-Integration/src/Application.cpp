@@ -27,7 +27,11 @@
 // ======================= SIMULATION PARAMETERS =======================
 
 const float fixedDeltaTime = 1.0f / 60.0f;
-const unsigned int subSteps = 8;            
+const unsigned int subSteps = 8; // Recommended sub steps
+
+// Choose one between the two, in the future you will be able to switch between the two at runtime
+bool renderVelocity = false;         
+bool renderTemperature = true; 
 
 const unsigned int totalNumberOfParticles = 6000;
 const float particleRadius = 5.0f;
@@ -43,7 +47,7 @@ const glm::vec4 simBorderColor(1.0f, 1.0f, 1.0f, 0.5f); // White
 const float borderWidth = 2.0f;
 
 const float streamSpeed = 18.0f;
-const Vec2 initialParticleSpeed = { 400.0f, 0.0f };
+const Vec2 initialParticleSpeed = { 300.0f, 0.0f };
 
 // physics constants are in the Constants.cpp file in the physics folder
 // =====================================================================
@@ -121,14 +125,20 @@ int main(void)
             sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 150 });
         }
       
-        // Initialize shader
-        std::string shaderPath = "res/shaders/ParticleShader.shader";
-        if (!IsShaderPathOk(shaderPath)) return 0;
-        Shader shader(shaderPath);
+        // Initialize shaders, this is not the most optimal but it works
+        std::string velShaderPath = "res/shaders/ParticleShaderVelocity.shader";
+        std::string tempShaderPath = "res/shaders/ParticleShaderTemperature.shader";
+        if (!IsShaderPathOk(tempShaderPath)) return 0;
+        if (!IsShaderPathOk(velShaderPath)) return 0;
+        Shader velShader(velShaderPath);
+        Shader tempShader(tempShaderPath);
 
+        Shader* activeShader = renderTemperature ? &tempShader : &velShader;
+        
         // Initialize particle renderer
-        ParticleRenderer renderer(sim, shader);
+        ParticleRenderer renderer(sim, *activeShader, renderTemperature);
 
+        // Initialize time manager for fixed step
         Time timeManager(fixedDeltaTime);
         int FPScounter = 0;
 

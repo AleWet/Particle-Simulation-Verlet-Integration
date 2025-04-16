@@ -33,7 +33,7 @@ void SimulationSystem::AddParticle(const Vec2& position, const Vec2& velocity, c
     m_PrevPositions.push_back(position - velocity); // Calculate prev position from velocity
     m_Accelerations.push_back(acceleration);
     m_Masses.push_back(mass);
-    m_Temperatures.push_back(20.0f); // Default temperature from Particle constructor
+    m_Temperatures.push_back(0.0f);  // Default temperature from Particle constructor
     m_Densities.push_back(0.0f);     // Default density
     m_Pressures.push_back(0.0f);     // Default pressure
 }

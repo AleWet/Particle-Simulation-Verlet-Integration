@@ -10,9 +10,15 @@
 
 class ParticleRenderer {
 private:
-    struct ParticleInstance {
+    struct ParticleInstanceVelocity {
         Vec2 position;
-        Vec2 velocity;  // Used for color calculations
+        Vec2 velocity;
+        float size;
+    };
+
+    struct ParticleInstanceTemperature {
+        Vec2 position;
+        float temperature;
         float size;
     };
 
@@ -24,12 +30,14 @@ private:
     VertexBuffer* m_InstanceBuffer;
     IndexBuffer* m_IndexBuffer;
 
-    std::vector<ParticleInstance> m_InstanceData;
+    std::vector<ParticleInstanceVelocity> m_InstanceData;
 
+    bool m_RenderTemperature;
+    
     void InitBuffers();
 
 public:
-    ParticleRenderer(const SimulationSystem& simulation, const Shader& shader);
+    ParticleRenderer(const SimulationSystem& simulation, const Shader& shader, bool renderTemperature = false);
     ~ParticleRenderer();
 
     void UpdateBuffers(float deltaTime);

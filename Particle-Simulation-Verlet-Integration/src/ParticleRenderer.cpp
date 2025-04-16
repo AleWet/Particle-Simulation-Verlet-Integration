@@ -3,11 +3,10 @@
 #include "VertexBufferLayout.h"
 #include <iostream>
 
-ParticleRenderer::ParticleRenderer(const SimulationSystem& simulation, const Shader& shader)
-    : m_Simulation(simulation), m_Shader(shader), m_VertexArray(nullptr),
+ParticleRenderer::ParticleRenderer(const SimulationSystem& simulation, const Shader& shader, bool renderTemperature)
+    : m_Simulation(simulation), m_Shader(shader), m_RenderTemperature(renderTemperature), m_VertexArray(nullptr),
     m_VertexBuffer(nullptr), m_InstanceBuffer(nullptr), m_IndexBuffer(nullptr)
 {
-    // Initialize buffers
     InitBuffers();
 }
 
@@ -74,14 +73,26 @@ void ParticleRenderer::InitBuffers()
     m_VertexArray->Bind();
     m_IndexBuffer->Bind();
 
+    // Calculate instance buffer size based on rendering mode
+    size_t instanceStructSize = m_RenderTemperature ?
+        sizeof(ParticleInstanceTemperature) : sizeof(ParticleInstanceVelocity);
+
     // Allocate based on current particle count
-    const size_t initialBufferSize = sizeof(ParticleInstance) * m_Simulation.GetPositions().size();
+    const size_t initialBufferSize = instanceStructSize * m_Simulation.GetPositions().size();
     m_InstanceBuffer = new VertexBuffer(nullptr, initialBufferSize, GL_STREAM_DRAW);
 
     // Set up instance buffer layout
     VertexBufferLayout instanceLayout;
     instanceLayout.Push<float>(2);  // Position (vec2)
-    instanceLayout.Push<float>(4);  // Color (vec4)
+
+    // Configure layout based on rendering mode
+    if (m_RenderTemperature) {
+        instanceLayout.Push<float>(1);  // Temperature (float)
+    }
+    else {
+        instanceLayout.Push<float>(2);  // Velocity (vec2)
+    }
+
     instanceLayout.Push<float>(1);  // Size (float)
 
     // Configure the instance buffer attributes
@@ -91,16 +102,29 @@ void ParticleRenderer::InitBuffers()
     // The instance data needs to be linked to the VAO with a divisor
     // This tells OpenGL that these attributes advance once per instance, not per vertex
     GLCall(glEnableVertexAttribArray(2)); // Start after the quad attributes (0,1)
-    GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(ParticleInstance), (void*)0));
+    GLCall(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, instanceStructSize, (void*)0));
     GLCall(glVertexAttribDivisor(2, 1)); // Position (advance one instance at a time)
 
-    GLCall(glEnableVertexAttribArray(3));
-    GLCall(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(ParticleInstance), (void*)(2 * sizeof(float))));
-    GLCall(glVertexAttribDivisor(3, 1)); // Velocity (advance one instance at a time)
+    if (m_RenderTemperature) {
+        // Temperature mode attributes
+        GLCall(glEnableVertexAttribArray(3));
+        GLCall(glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, instanceStructSize, (void*)(2 * sizeof(float))));
+        GLCall(glVertexAttribDivisor(3, 1)); // Temperature (advance one instance at a time)
 
-    GLCall(glEnableVertexAttribArray(4));
-    GLCall(glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(ParticleInstance), (void*)(4 * sizeof(float))));
-    GLCall(glVertexAttribDivisor(4, 1)); // Size (advance one instance at a time)
+        GLCall(glEnableVertexAttribArray(4));
+        GLCall(glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, instanceStructSize, (void*)(3 * sizeof(float))));
+        GLCall(glVertexAttribDivisor(4, 1)); // Size (advance one instance at a time)
+    }
+    else {
+        // Velocity mode attributes
+        GLCall(glEnableVertexAttribArray(3));
+        GLCall(glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, instanceStructSize, (void*)(2 * sizeof(float))));
+        GLCall(glVertexAttribDivisor(3, 1)); // Velocity (advance one instance at a time)
+
+        GLCall(glEnableVertexAttribArray(4));
+        GLCall(glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, instanceStructSize, (void*)(4 * sizeof(float))));
+        GLCall(glVertexAttribDivisor(4, 1)); // Size (advance one instance at a time)
+    }
 
     // Unbind everything
     m_VertexArray->UnBind();
@@ -114,42 +138,78 @@ void ParticleRenderer::UpdateBuffers(float deltaTime)
     // Get particle data from simulation
     const std::vector<Vec2>& positions = m_Simulation.GetPositions();
     const std::vector<Vec2>& prevPositions = m_Simulation.GetPrevPositions();
+    const std::vector<float>& temperatures = m_Simulation.GetTemperatures();
     const size_t particleCount = positions.size();
 
     if (particleCount == 0) {
         return;
     }
 
-    // Resize only if needed, preserving capacity
-    if (m_InstanceData.size() < particleCount) {
-        m_InstanceData.resize(particleCount);
+    // Calculate the size of each instance based on rendering mode
+    size_t instanceStructSize = m_RenderTemperature ?
+        sizeof(ParticleInstanceTemperature) : sizeof(ParticleInstanceVelocity);
+
+    // Resize only if needed
+    if (m_RenderTemperature) {
+        // Temperature mode
+        std::vector<ParticleInstanceTemperature> tempData;
+        tempData.resize(particleCount);
+
+        float particleRadius = m_Simulation.GetParticleRadius();
+        for (size_t i = 0; i < particleCount; i++) {
+            tempData[i].position = positions[i];
+            tempData[i].temperature = temperatures[i];
+            tempData[i].size = particleRadius;
+        }
+
+        // Update buffer
+        m_InstanceBuffer->Bind();
+        size_t dataSize = sizeof(ParticleInstanceTemperature) * particleCount;
+
+        // Only reallocate if buffer is too small
+        if (dataSize > m_InstanceBuffer->GetSize()) {
+            // Allocate with some growth factor to avoid frequent resizing
+            size_t newSize = dataSize * 2;
+            glBufferData(GL_ARRAY_BUFFER, newSize, nullptr, GL_STREAM_DRAW);
+            m_InstanceBuffer->Resize(newSize);
+        }
+
+        // Update the data
+        glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, tempData.data());
+    }
+    else {
+        // Resize only if needed, preserving capacity
+        if (m_InstanceData.size() < particleCount) {
+            m_InstanceData.resize(particleCount);
+        }
+
+        // Update instance data with particle positions and velocities
+        float particleRadius = m_Simulation.GetParticleRadius();
+        for (size_t i = 0; i < particleCount; i++) {
+            m_InstanceData[i].position = positions[i];
+
+            // Calculate velocity from positions (Verlet)
+            Vec2 velocity = (positions[i] - prevPositions[i]) / deltaTime;
+            m_InstanceData[i].velocity = velocity;
+            m_InstanceData[i].size = particleRadius;
+        }
+
+        // Update buffer
+        m_InstanceBuffer->Bind();
+        size_t dataSize = sizeof(ParticleInstanceVelocity) * particleCount;
+
+        // Only reallocate if buffer is too small
+        if (dataSize > m_InstanceBuffer->GetSize()) {
+            // Allocate with some growth factor to avoid frequent resizing
+            size_t newSize = dataSize * 2;
+            glBufferData(GL_ARRAY_BUFFER, newSize, nullptr, GL_STREAM_DRAW);
+            m_InstanceBuffer->Resize(newSize);
+        }
+
+        // Update the data
+        glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, m_InstanceData.data());
     }
 
-    // Update instance data with particle positions and velocities
-    float particleRadius = m_Simulation.GetParticleRadius();
-    for (size_t i = 0; i < particleCount; i++) {
-        m_InstanceData[i].position = positions[i];
-
-        // Calculate velocity from positions (Verlet)
-        Vec2 velocity = (positions[i] - prevPositions[i]) / deltaTime;
-        m_InstanceData[i].velocity = velocity;
-        m_InstanceData[i].size = particleRadius;
-    }
-
-    // Update buffer
-    m_InstanceBuffer->Bind();
-    size_t dataSize = sizeof(ParticleInstance) * particleCount;
-
-    // Only reallocate if buffer is too small
-    if (dataSize > m_InstanceBuffer->GetSize()) {
-        // Allocate with some growth factor to avoid frequent resizing
-        size_t newSize = dataSize * 2;
-        glBufferData(GL_ARRAY_BUFFER, newSize, nullptr, GL_STREAM_DRAW);
-        m_InstanceBuffer->Resize(newSize);
-    }
-
-    // Update the data
-    glBufferSubData(GL_ARRAY_BUFFER, 0, dataSize, m_InstanceData.data());
     m_InstanceBuffer->UnBind();
 }
 

@@ -7,6 +7,7 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
     std::vector<Vec2>& positions,
     std::vector<Vec2>& prevPositions,
     std::vector<Vec2>& accelerations,
+    std::vector<float>& temperatures,
     const std::vector<float>& masses,
     Vec2 simCenter,
     Vec2 mousePos,
@@ -37,7 +38,6 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
         }
 
         Vec2 nullVec = { -1, -1 };
-        
         if (isLeftClickPressed && mousePos != nullVec)  
         {
             // Calculate direction vector from particle to mouse position
@@ -99,6 +99,7 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
 
         // Apply air resistance
         accelerations[i] -= velocity * (AIR_RESISTANCE / masses[i]);
+        temperatures[i] += velocity.length() * AIR_RESISTANCE * 0.01f;
 
         // Store current position for next integration step
         Vec2 temp = positions[i];
@@ -111,6 +112,15 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
 
         // Reset acceleration for next frame
         accelerations[i] = { 0.0f, 0.0f };
+
+        // Heat dispersion
+        temperatures[i] -= HEAT_DISPERSION_PER_FRAME;
+        
+        // Temperatures bounds
+        if (temperatures[i] > 1000000.0f)
+            temperatures[i] = 1000000.0f;
+        else if (temperatures[i] < 0.0f)
+            temperatures[i] = 0.0f;
     }
 }
 
@@ -121,6 +131,7 @@ void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed
     std::vector<Vec2>& prevPositions = sim.GetPrevPositions();
     std::vector<Vec2>& accelerations = sim.GetAccelerations();
     std::vector<float>& masses = sim.GetMasses();
+    std::vector<float>& temperatures = sim.GetTemperatures();
 
     size_t particleCount = positions.size();
     const float subStepDt = deltaTime / sim.GetSubSteps();
@@ -138,8 +149,9 @@ void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed
                 size_t end = (t == numThreads - 1) ? particleCount : start + particlesPerThread;
 
                 threads.emplace_back(UpdateParticles, start, end, subStepDt,
-                    std::ref(positions), std::ref(prevPositions), std::ref(accelerations),
-                    std::cref(masses), sim.GetSimCenter(), sim.GetMousePosition(), isSpaceBarPressed, isLeftClickPressed, isRightClickPressed);
+                    std::ref(positions), std::ref(prevPositions), std::ref(accelerations), 
+                    std::ref(temperatures), std::cref(masses), sim.GetSimCenter(), sim.GetMousePosition(), 
+                    isSpaceBarPressed, isLeftClickPressed, isRightClickPressed);
             }
 
             for (auto& t : threads) t.join();
@@ -157,6 +169,7 @@ void SolveParticleCollisions(SimulationSystem& sim, float deltaTime)
     std::vector<Vec2>& positions = sim.GetPositions();
     std::vector<Vec2>& prevPositions = sim.GetPrevPositions();
     std::vector<float>& masses = sim.GetMasses();
+    std::vector<float>& temperatures = sim.GetTemperatures();
 
     const float subStepDt = deltaTime / sim.GetSubSteps();
     size_t particleCount = positions.size();
@@ -206,6 +219,25 @@ void SolveParticleCollisions(SimulationSystem& sim, float deltaTime)
             // Position correction
             positions[i] += normal * (overlap * p1Ratio * responseCoef);
             positions[j] -= normal * (overlap * p2Ratio * responseCoef);
+
+
+            // Heat transfer
+            float deltaTemp = abs(temperatures[i] - temperatures[j]);
+            if (deltaTemp > 0.01f) 
+            {
+                if (temperatures[i] > temperatures[j])
+                {
+                    float heatTransfered = std::min(MAX_HEAT_TRANSFER_PER_COLLISION, deltaTemp / 2.0f);
+                    temperatures[i] -= heatTransfered;
+                    temperatures[j] += heatTransfered;
+                }
+                else
+                {
+                    float heatTransfered = std::min(MAX_HEAT_TRANSFER_PER_COLLISION, deltaTemp / 2.0f);
+                    temperatures[j] -= heatTransfered;
+                    temperatures[i] += heatTransfered;
+                }
+            }
         }
     }
 
