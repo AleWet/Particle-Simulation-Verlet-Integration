@@ -29,8 +29,9 @@
 const float fixedDeltaTime = 1.0f / 60.0f;
 const unsigned int subSteps = 8;            
 
-const unsigned int totalNumberOfParticles = 17000;
-const float particleRadius = 3.5f;
+const unsigned int totalNumberOfParticles = 6000;
+const float particleRadius = 5.0f;
+const float particleMass = 1.0f;
 
 const float zoom = 0.6f;
 const float simWidth = 1000.0f;
@@ -42,7 +43,7 @@ const glm::vec4 simBorderColor(1.0f, 1.0f, 1.0f, 0.5f); // White
 const float borderWidth = 2.0f;
 
 const float streamSpeed = 18.0f;
-const Vec2 initialParticleSpeed = { 200.0f, 0.0f };
+const Vec2 initialParticleSpeed = { 400.0f, 0.0f };
 
 // physics constants are in the Constants.cpp file in the physics folder
 // =====================================================================
@@ -101,23 +102,23 @@ int main(void)
         // Initialize particle streams
         if (totalNumberOfParticles < 40)
         {
-            sim.AddParticleStream(totalNumberOfParticles, streamSpeed, initialParticleSpeed, particleRadius, { 10, 0 });
+            sim.AddParticleStream(totalNumberOfParticles, streamSpeed, initialParticleSpeed, particleMass, { 10, 0 });
         }
         else if (totalNumberOfParticles < 1000)
         {
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleRadius, { 10, 0 });
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleRadius, { 10, 30 });
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleRadius, { 10, 60 });
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleRadius, { 10, 90 });
+            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 0 });
+            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 30 });
+            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 60 });
+            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 90 });
         }
         else
         {
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleRadius, { 10, 0 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleRadius, { 10, 30 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleRadius, { 10, 60 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleRadius, { 10, 90 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleRadius, { 10, 120 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleRadius, { 10, 150 });
+            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 0 });
+            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 30 });
+            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 60 });
+            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 90 });
+            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 120 });
+            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 150 });
         }
       
         // Initialize shader

@@ -100,8 +100,6 @@ public:
     // Get simulation bounds
     const Bounds GetBounds() const { return m_Bounds; }
 
-
-
     // Add new particle stream
     void AddParticleStream(int totalParticles, float spawnRate, const Vec2& initialVelocity,
         float mass, const Vec2& initialOffset);

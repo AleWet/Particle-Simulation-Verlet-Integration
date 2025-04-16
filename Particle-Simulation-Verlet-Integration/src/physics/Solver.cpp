@@ -47,7 +47,6 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
             float distSq = toMouse.length_sq();
 
             // Only affect particles within a certain range
-
             if (distSq > 0.01f && distSq < MAX_FORCE_DISTANCE_SQ) {
                 // Normalize direction vector
                 Vec2 direction = toMouse.normalized();
@@ -71,7 +70,6 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
             float distSq = toMouse.length_sq();
 
             // Only affect particles within a certain range
-
             if (distSq > 0.01f && distSq < MAX_FORCE_DISTANCE_SQ) {
                 // Normalize direction vector
                 Vec2 direction = toMouse.normalized();
