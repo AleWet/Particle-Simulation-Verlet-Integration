@@ -33,8 +33,8 @@ const unsigned int subSteps = 8; // Recommended sub steps
 bool renderVelocity = false;         
 bool renderTemperature = true; 
 
-const unsigned int totalNumberOfParticles = 6000;
-const float particleRadius = 5.0f;
+const unsigned int totalNumberOfParticles = 17000;
+const float particleRadius = 2.0f;
 const float particleMass = 1.0f;
 
 const float zoom = 0.6f;

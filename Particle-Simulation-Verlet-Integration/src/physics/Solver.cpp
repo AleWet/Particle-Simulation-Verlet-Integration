@@ -262,6 +262,7 @@ void SolveParticleCollisions(SimulationSystem& sim, float deltaTime)
 void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
 {
     std::vector<Vec2>& positions = sim.GetPositions();
+    std::vector<float>& temperatures = sim.GetTemperatures();
     std::vector<Vec2>& prevPositions = sim.GetPrevPositions();
 
     const Bounds bounds = sim.GetBounds();
@@ -282,6 +283,9 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             positions[i].x += penetration;  // Resolve penetration
             velocity.x = -velocity.x * RESTITUTION;  // Reflect x velocity with restitution
             collisionOccurred = true;
+            
+            // Heat sink
+            temperatures[i] -= MAX_HEAT_TRANSFER_PER_COLLISION;
         }
 
         // Right boundary
@@ -291,6 +295,9 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             positions[i].x -= penetration;  // Resolve penetration
             velocity.x = -velocity.x * RESTITUTION;  // Reflect x velocity with restitution
             collisionOccurred = true;
+
+            // Heat source
+            temperatures[i] += MAX_HEAT_TRANSFER_PER_COLLISION;
         }
 
         // Bottom boundary
