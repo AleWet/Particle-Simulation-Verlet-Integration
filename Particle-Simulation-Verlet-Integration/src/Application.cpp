@@ -44,6 +44,7 @@ const Vec2 bottomLeft(-simWidth / 2, -simHeight / 2);
 const Vec2 topRight(simWidth / 2, simHeight / 2);
 
 const glm::vec4 simBorderColor(1.0f, 1.0f, 1.0f, 0.5f); // White
+const glm::vec4 simBGColor(0.0f, 0.0f, 0.0f, 1.0f); // Black
 const float borderWidth = 2.0f;
 
 const float streamSpeed = 18.0f;
@@ -63,7 +64,7 @@ int main(void)
     }
 
     // Set OpenGL version hints
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //core profile ==> no standard VA 
 
@@ -142,7 +143,7 @@ int main(void)
         Time timeManager(fixedDeltaTime);
         int FPScounter = 0;
 
-        GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));  // Black background
+        GLCall(glClearColor(simBGColor.r, simBGColor.g, simBGColor.b, simBGColor.a));
 
         // Main loop
         while (!glfwWindowShouldClose(window))
