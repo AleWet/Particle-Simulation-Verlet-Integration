@@ -15,7 +15,7 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
     bool isLeftClickPressed,
     bool isRightClickPressed) {
 
-    for (size_t i = start; i < end; i++) 
+    for (size_t i = start; i < end; i++)
     {
         // Apply gravity
         accelerations[i] += GRAVITY;
@@ -38,7 +38,7 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
         }
 
         Vec2 nullVec = { -1, -1 };
-        if (isLeftClickPressed && mousePos != nullVec)  
+        if (isLeftClickPressed && mousePos != nullVec)
         {
             // Calculate direction vector from particle to mouse position
             Vec2 toMouse = mousePos - positions[i];
@@ -114,8 +114,8 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
         accelerations[i] = { 0.0f, 0.0f };
 
         // Heat dispersion
-        temperatures[i] -= HEAT_DISPERSION_PER_FRAME;
-        
+        temperatures[i] -= THERMAL_DISPERSION_PER_FRAME;
+
         // Temperatures bounds
         if (temperatures[i] > 400.0f)
             temperatures[i] = 400.0f; // For more info look at the start of the "Application.cpp" file
@@ -124,7 +124,7 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
     }
 }
 
-void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed, bool isLeftClickPressed, bool isRightClickPressed) 
+void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed, bool isLeftClickPressed, bool isRightClickPressed)
 {
     // Get references to SoA data
     std::vector<Vec2>& positions = sim.GetPositions();
@@ -143,14 +143,14 @@ void SolvePhysics(SimulationSystem& sim, float deltaTime, bool isSpaceBarPressed
     for (int step = 0; step < sim.GetSubSteps(); step++)
     {
         {
-            for (unsigned int t = 0; t < numThreads; ++t) 
+            for (unsigned int t = 0; t < numThreads; ++t)
             {
                 size_t start = t * particlesPerThread;
                 size_t end = (t == numThreads - 1) ? particleCount : start + particlesPerThread;
 
                 threads.emplace_back(UpdateParticles, start, end, subStepDt,
-                    std::ref(positions), std::ref(prevPositions), std::ref(accelerations), 
-                    std::ref(temperatures), std::cref(masses), sim.GetSimCenter(), sim.GetMousePosition(), 
+                    std::ref(positions), std::ref(prevPositions), std::ref(accelerations),
+                    std::ref(temperatures), std::cref(masses), sim.GetSimCenter(), sim.GetMousePosition(),
                     isSpaceBarPressed, isLeftClickPressed, isRightClickPressed);
             }
 
@@ -223,17 +223,17 @@ void SolveParticleCollisions(SimulationSystem& sim, float deltaTime)
 
             // Heat transfer
             float deltaTemp = abs(temperatures[i] - temperatures[j]);
-            if (deltaTemp > 0.01f) 
+            if (deltaTemp > 0.01f)
             {
                 if (temperatures[i] > temperatures[j])
                 {
-                    float heatTransfered = std::min(MAX_HEAT_TRANSFER_PER_COLLISION, deltaTemp / 2.0f);
+                    float heatTransfered = std::min(MAX_THERMAL_DIFFUSION_PER_COLLISION, deltaTemp / 2.0f);
                     temperatures[i] -= heatTransfered;
                     temperatures[j] += heatTransfered;
                 }
                 else
                 {
-                    float heatTransfered = std::min(MAX_HEAT_TRANSFER_PER_COLLISION, deltaTemp / 2.0f);
+                    float heatTransfered = std::min(MAX_THERMAL_DIFFUSION_PER_COLLISION, deltaTemp / 2.0f);
                     temperatures[j] -= heatTransfered;
                     temperatures[i] += heatTransfered;
                 }
@@ -268,7 +268,7 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
     const Bounds bounds = sim.GetBounds();
     const float radius = sim.GetParticleRadius();
     const float subStepDt = deltaTime / sim.GetSubSteps();
-    size_t particleCount = positions.size();    
+    size_t particleCount = positions.size();
 
     for (size_t i = 0; i < particleCount; i++)
     {
@@ -303,7 +303,7 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             collisionOccurred = true;
 
             // Heat source
-            temperatures[i] += MAX_HEAT_TRANSFER_PER_COLLISION;
+            temperatures[i] += MAX_THERMAL_DIFFUSION_PER_COLLISION;
         }
 
         // Top boundary
@@ -313,9 +313,9 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             positions[i].y -= penetration;  // Resolve penetration
             velocity.y = -velocity.y * RESTITUTION;  // Reflect y velocity with restitution
             collisionOccurred = true;
-            
+
             // Heat sink
-            temperatures[i] -= MAX_HEAT_TRANSFER_PER_COLLISION;
+            temperatures[i] -= MAX_THERMAL_DIFFUSION_PER_COLLISION;
         }
 
         // Update previous position if collision occurred to maintain the reflected velocity
