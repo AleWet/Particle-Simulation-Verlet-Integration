@@ -1,7 +1,6 @@
 #pragma once
 #include "vec2.h"
 
-// Only declarations
 extern const float RESTITUTION;
 extern const float AIR_RESISTANCE;
 extern const float INVERSE_AIR_RESISTANCE;
@@ -13,5 +12,5 @@ extern const float DAMPING_FACTOR;
 extern const float SPACEBAR_FORCE_COEFFICIENT;
 extern const float LEFT_CLICK_FORCE_COEFFICIENT;
 extern const float MAX_FORCE_DISTANCE_SQ;
-extern const float HEAT_DISPERSION_PER_FRAME;
-extern const float MAX_HEAT_TRANSFER_PER_COLLISION;
+extern const float THERMAL_DISPERSION_PER_FRAME;
+extern const float MAX_THERMAL_DIFFUSION_PER_COLLISION;

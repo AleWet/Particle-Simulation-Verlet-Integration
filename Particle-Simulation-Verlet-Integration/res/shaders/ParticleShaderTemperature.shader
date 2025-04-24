@@ -48,12 +48,14 @@ void main()
     // Create a soft circle shape with smooth edges
     float circleShape = 1.0 - smoothstep(0.9, 1.0, distance);
 
+    // max temperature per particle = 400
+
     // Temperature thresholds
     float minTemp = 0.0;        // Cold (black)
-    float lowTemp = 20.0;       // Starting temperature (red)
-    float medTemp = 100.0;      // Medium temperature (orange)
-    float highTemp = 200.0;     // High temperature (yellow)
-    float veryHighTemp = 300.0; // Very high temperature (white)
+    float lowTemp = 50.0;       // Starting temperature (red)
+    float medTemp = 175.0;      // Medium temperature (orange)
+    float highTemp = 300.0;     // High temperature (yellow)
+    float veryHighTemp = 400.0; // Very high temperature (white)
     
     vec3 colorRGB;
     

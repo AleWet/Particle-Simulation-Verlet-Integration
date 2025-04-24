@@ -23,7 +23,6 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-
 // ======================= SIMULATION PARAMETERS =======================
 
 const float fixedDeltaTime = 1.0f / 60.0f;
@@ -33,8 +32,8 @@ const unsigned int subSteps = 8; // Recommended sub steps
 bool renderVelocity = false;         
 bool renderTemperature = true; 
 
-const unsigned int totalNumberOfParticles = 17000;
-const float particleRadius = 2.0f;
+const unsigned int totalNumberOfParticles = 7000;
+const float particleRadius = 6.0f;
 const float particleMass = 1.0f;
 
 const float zoom = 0.6f;
@@ -44,13 +43,27 @@ const Vec2 bottomLeft(-simWidth / 2, -simHeight / 2);
 const Vec2 topRight(simWidth / 2, simHeight / 2);
 
 const glm::vec4 simBorderColor(1.0f, 1.0f, 1.0f, 0.5f); // White
-const glm::vec4 simBGColor(0.0f, 0.0f, 0.0f, 1.0f); // Black
+const glm::vec4 simBGColor(0.0f, 0.0f, 0.0f, 1.0f);     // Black
 const float borderWidth = 2.0f;
 
 const float streamSpeed = 18.0f;
 const Vec2 initialParticleSpeed = { 300.0f, 0.0f };
 
-// physics constants are in the Constants.cpp file in the physics folder
+// ------ HARDCODED CONSTANTS ------
+// 
+// the rendered color of the temperature ranges are:
+// 
+//  Cold                  0    -   50   (black)
+//  Starting temperature  50   -   170  (red)
+//  Medium temperature    175  -   300  (orange)
+//  High temperature      300  -   400  (yellow)
+//  Very high temperature 400+          (white)
+//
+// These cannot be changed at the moment and the simulation caps 
+// the temperature of a single particle at 400 units
+
+
+// physics constants can be changed in the Constants.cpp file in the physics folder
 // =====================================================================
 
 

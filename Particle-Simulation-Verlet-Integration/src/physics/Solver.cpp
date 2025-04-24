@@ -117,8 +117,8 @@ void UpdateParticles(size_t start, size_t end, float subStepDt,
         temperatures[i] -= HEAT_DISPERSION_PER_FRAME;
         
         // Temperatures bounds
-        if (temperatures[i] > 1000000.0f)
-            temperatures[i] = 1000000.0f;
+        if (temperatures[i] > 400.0f)
+            temperatures[i] = 400.0f; // For more info look at the start of the "Application.cpp" file
         else if (temperatures[i] < 0.0f)
             temperatures[i] = 0.0f;
     }
@@ -283,9 +283,6 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             positions[i].x += penetration;  // Resolve penetration
             velocity.x = -velocity.x * RESTITUTION;  // Reflect x velocity with restitution
             collisionOccurred = true;
-            
-            // Heat sink
-            temperatures[i] -= MAX_HEAT_TRANSFER_PER_COLLISION;
         }
 
         // Right boundary
@@ -295,9 +292,6 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             positions[i].x -= penetration;  // Resolve penetration
             velocity.x = -velocity.x * RESTITUTION;  // Reflect x velocity with restitution
             collisionOccurred = true;
-
-            // Heat source
-            temperatures[i] += MAX_HEAT_TRANSFER_PER_COLLISION;
         }
 
         // Bottom boundary
@@ -307,6 +301,9 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             positions[i].y += penetration;  // Resolve penetration
             velocity.y = -velocity.y * RESTITUTION;  // Reflect y velocity with restitution
             collisionOccurred = true;
+
+            // Heat source
+            temperatures[i] += MAX_HEAT_TRANSFER_PER_COLLISION;
         }
 
         // Top boundary
@@ -316,6 +313,9 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
             positions[i].y -= penetration;  // Resolve penetration
             velocity.y = -velocity.y * RESTITUTION;  // Reflect y velocity with restitution
             collisionOccurred = true;
+            
+            // Heat sink
+            temperatures[i] -= MAX_HEAT_TRANSFER_PER_COLLISION;
         }
 
         // Update previous position if collision occurred to maintain the reflected velocity
