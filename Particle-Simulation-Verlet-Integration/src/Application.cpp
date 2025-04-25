@@ -30,31 +30,29 @@
 
 // ======================= SIMULATION PARAMETERS =======================
 
-const float fixedDeltaTime = 1.0f / 60.0f;
-const unsigned int subSteps = 8;                        // Recommended 
+float fixedDeltaTime = 1.0f / 60.0f;
+unsigned int subSteps = 8;                        // Recommended 
 
 // Choose one between the two ways of adding particles to the 
 // simulation, for smoother results the particleStream is 
 // recommended. The number of particle streams is proportional 
 // to the total numeber of particles
-const bool addParticleInBulk = true;
-const bool addParticleInStream = false;
+bool addParticleInBulk = true;
+bool addParticleInStream = false;
 
-const unsigned int totalNumberOfParticles = 10000;      
+unsigned int totalNumberOfParticles = 10000;
 const float particleRadius = 2.7f;
 const float particleMass = 1.0f;
 
-const float zoom = 0.6f;
+const float initialZoom = 0.6f;
 const float simWidth = 1000.0f;
 const float simHeight = 1000.0f;
 const Vec2 bottomLeft(-simWidth / 2, -simHeight / 2);
 const Vec2 topRight(simWidth / 2, simHeight / 2);
 
-
-const float borderWidth = 2.0f;
-
-const float streamSpeed = 18.0f;                        // Recommended
-const Vec2 initialParticleSpeed = { 300.0f, 0.0f };     
+float borderWidth = 2.0f;
+float streamSpeed = 18.0f;                        // Recommended
+Vec2 initialParticleSpeed = { 300.0f, 0.0f };
 
 // ------ HARDCODED CONSTANTS ------
 // 
@@ -73,6 +71,21 @@ const Vec2 initialParticleSpeed = { 300.0f, 0.0f };
 // physics constants can be changed in the Constants.cpp file in the physics folder
 // =====================================================================
 
+
+// Function to reset the simulation with current parameters
+void ResetSimulation(SimulationSystem& sim, float zoom) {
+    sim.Reset();
+    sim.SetZoom(zoom);
+
+    if (addParticleInBulk) {
+        sim.AddBulkParticles(totalNumberOfParticles, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), particleMass);
+    }
+    else if (addParticleInStream) {
+        const unsigned int numberOfStreams = std::max(std::min(totalNumberOfParticles / 1500, 10u), 1u);
+        for (int i = 0; i < numberOfStreams; i++)
+            sim.AddParticleStream(totalNumberOfParticles / numberOfStreams, streamSpeed, initialParticleSpeed, particleMass, { 10, 5 * particleRadius * i });
+    }
+}
 
 int main(void)
 {
@@ -122,8 +135,8 @@ int main(void)
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
     std::cout << "ImGui Version : " << ImGui::GetVersion() << std::endl;
-    
-    #pragma endregion
+
+#pragma endregion
 
     { //additional scope to avoid memory leaks
 
@@ -131,7 +144,7 @@ int main(void)
 
         // Initialize simulation
         SimulationSystem sim(totalNumberOfParticles, bottomLeft, topRight, particleRadius, subSteps);
-        sim.SetZoom(zoom);
+        sim.SetZoom(initialZoom);
 
         if (addParticleInBulk)
         {
@@ -149,6 +162,10 @@ int main(void)
         float simBGColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
         bool renderVelocity = true;
         bool renderTemperature = false;
+        bool needsReset = false;
+
+        // For particle speed vector input
+        float particleSpeedValues[2] = { initialParticleSpeed.x, initialParticleSpeed.y };
 
         // Initialize shader, renderer and time manager
         std::string velShaderPath = "res/shaders/ParticleShaderVelocity.shader";
@@ -191,13 +208,18 @@ int main(void)
             // Rendering
             renderer->UpdateBuffers(fixedDeltaTime);
             renderer->Render();
-            BoundsRenderer(sim.GetBounds().bottomLeft, sim.GetBounds().topRight, 
-                borderWidth, glm::make_vec4(simBorderColor), sim.GetProjMatrix()* sim.GetViewMatrix());
+            BoundsRenderer(sim.GetBounds().bottomLeft, sim.GetBounds().topRight,
+                borderWidth, glm::make_vec4(simBorderColor), sim.GetProjMatrix() * sim.GetViewMatrix());
 
             ImGui::Begin("Settings");
-            ImGui::ColorEdit4("Border color", simBorderColor);
+
+            ImGui::Text("Rendering : ");
             ImGui::ColorEdit4("Background color", simBGColor);
-            ImGui::Text("Set rendering type : ");
+            ImGui::ColorEdit4("Border color", simBorderColor);
+            ImGui::SliderFloat("Border Width", &borderWidth, 1.0f, 10.0f, "%.1f");
+
+            // Render type settings
+            ImGui::Text("Set rendering type:");
             ImGui::SameLine();
 
             bool oldRenderTemperature = renderTemperature;
@@ -208,13 +230,64 @@ int main(void)
                 renderTemperature = true;
 
             // Not the best implementation but it works
-            if (oldRenderTemperature != renderTemperature) 
+            if (oldRenderTemperature != renderTemperature)
             {
                 renderVelocity = !renderTemperature;
                 activeShader = renderTemperature ? &tempShader : &velShader;
                 renderer = std::make_unique<ParticleRenderer>(sim, *activeShader, renderTemperature);
             }
 
+            ImGui::Separator();
+
+            // Particle spawning options
+            ImGui::Text("Particle spawn method:");
+            bool oldBulkSetting = addParticleInBulk;
+            bool oldStreamSetting = addParticleInStream;
+
+            if (ImGui::RadioButton("Bulk", addParticleInBulk))
+            {
+                addParticleInBulk = true;
+                addParticleInStream = false;
+                needsReset = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Stream", addParticleInStream))
+            {
+                addParticleInBulk = false;
+                addParticleInStream = true;
+                needsReset = true;
+            }
+
+            // Simulation parameters
+            ImGui::Text("Simulation Parameters:");
+
+            // Total number of particles
+            unsigned int oldParticleCount = totalNumberOfParticles;
+            ImGui::InputScalar("Total Particles", ImGuiDataType_U32, &totalNumberOfParticles, NULL, NULL, "%u");
+            if (oldParticleCount != totalNumberOfParticles) 
+                needsReset = true;
+            
+            // Stream-specific parameters (only show if stream is selected)
+            if (addParticleInStream) 
+            {
+                ImGui::SliderFloat("Stream Speed", &streamSpeed, 5.0f, 50.0f, "%.1f");
+
+                // Particle initial velocity
+                if (ImGui::InputFloat2("Initial Particle Speed", particleSpeedValues)) 
+                {
+                    initialParticleSpeed.x = particleSpeedValues[0];
+                    initialParticleSpeed.y = particleSpeedValues[1];
+                    needsReset = true;
+                }
+            }
+
+            const float buttonWidth = ImGui::GetContentRegionAvail().x;
+            if (ImGui::Button("Reset Simulation", ImVec2(buttonWidth, 30)))
+            {
+                ResetSimulation(sim, initialZoom);
+                needsReset = false;
+                timeManager = Time(fixedDeltaTime);
+            }
 
             ImGui::End();
             ImGui::Render();

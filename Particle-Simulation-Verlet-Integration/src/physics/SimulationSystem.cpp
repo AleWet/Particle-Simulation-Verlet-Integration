@@ -207,3 +207,32 @@ void SimulationSystem::UpdateSpatialGrid()
     }
 }
 
+void SimulationSystem::Reset() {
+    // Clear all particles and streams
+    ClearParticles();
+    ClearStreams();
+
+    // Reset camera position
+    m_CameraPosition = Vec2(0.0f, 0.0f);
+
+    // Reset simulation state variables
+    m_IsSpaceBarPressed = false;
+    m_IsLeftButtonClicked = false;
+    m_IsRightButtonClicked = false;
+    m_IsPaused = false;
+    m_CurrentNumOfParticles = 0;
+
+    // Reset spatial grid
+    m_SpatialGrid = SpatialGrid(m_SpatialGrid.GetParticleCount(), m_ParticleRadius, m_Bounds.bottomLeft, m_Bounds.topRight);
+    m_SpatialGridInitialized = false;
+
+    // Reserve vectors again at original capacity
+    unsigned int maxParticles = m_SpatialGrid.GetParticleCount();
+    m_Positions.reserve(maxParticles);
+    m_PrevPositions.reserve(maxParticles);
+    m_Accelerations.reserve(maxParticles);
+    m_Masses.reserve(maxParticles);
+    m_Temperatures.reserve(maxParticles);
+    m_Densities.reserve(maxParticles);
+    m_Pressures.reserve(maxParticles);
+}

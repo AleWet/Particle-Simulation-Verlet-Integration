@@ -125,6 +125,9 @@ public:
         m_SpatialGridInitialized = false;
     }
 
+    // Method to completely reset the simulation state
+    void Reset();
+
     // Method to get active stream count
     size_t GetActiveStreamCount() const { return m_Streams.size(); }
 
