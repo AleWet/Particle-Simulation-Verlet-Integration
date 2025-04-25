@@ -320,8 +320,7 @@ void SolveBoundaryCollisions(SimulationSystem& sim, float deltaTime)
 
         // Update previous position if collision occurred to maintain the reflected velocity
         if (collisionOccurred)
-        {
             prevPositions[i] = positions[i] - velocity * subStepDt;
-        }
+        
     }
 }

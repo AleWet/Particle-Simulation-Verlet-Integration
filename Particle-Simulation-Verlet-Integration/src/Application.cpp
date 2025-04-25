@@ -8,6 +8,11 @@
 #include <sstream>
 
 #include "Renderer.h"
+#include "ParticleRenderer.h"
+#include "Utils.h"
+
+#include "physics/SimulationSystem.h"
+#include "core/Time.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -15,25 +20,28 @@
 #include "VertexBufferLayout.h"
 #include "Shader.h"
 #include "Texture.h"
-#include "core/Time.h"
-#include "Utils.h"
-#include "physics/SimulationSystem.h"
-#include "ParticleRenderer.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/imgui_impl_glfw.h"
+#include "vendor/imgui/imgui_impl_opengl3.h"
 
 // ======================= SIMULATION PARAMETERS =======================
 
 const float fixedDeltaTime = 1.0f / 60.0f;
-const unsigned int subSteps = 8; // Recommended sub steps
+const unsigned int subSteps = 8;                        // Recommended 
 
-// Choose one between the two, in the future you will be able to switch between the two at runtime
-bool renderVelocity = false;         
-bool renderTemperature = true; 
+// Choose one between the two ways of adding particles to the 
+// simulation, for smoother results the particleStream is 
+// recommended. The number of particle streams is proportional 
+// to the total numeber of particles
+const bool addParticleInBulk = true;
+const bool addParticleInStream = false;
 
-const unsigned int totalNumberOfParticles = 7000;
-const float particleRadius = 6.0f;
+const unsigned int totalNumberOfParticles = 10000;      
+const float particleRadius = 2.7f;
 const float particleMass = 1.0f;
 
 const float zoom = 0.6f;
@@ -42,22 +50,21 @@ const float simHeight = 1000.0f;
 const Vec2 bottomLeft(-simWidth / 2, -simHeight / 2);
 const Vec2 topRight(simWidth / 2, simHeight / 2);
 
-const glm::vec4 simBorderColor(1.0f, 1.0f, 1.0f, 0.5f); // White
-const glm::vec4 simBGColor(0.0f, 0.0f, 0.0f, 1.0f);     // Black
+
 const float borderWidth = 2.0f;
 
-const float streamSpeed = 18.0f;
-const Vec2 initialParticleSpeed = { 300.0f, 0.0f };
+const float streamSpeed = 18.0f;                        // Recommended
+const Vec2 initialParticleSpeed = { 300.0f, 0.0f };     
 
 // ------ HARDCODED CONSTANTS ------
 // 
 // the rendered color of the temperature ranges are:
 // 
-//  Cold                  0    -   50   (black)
-//  Starting temperature  50   -   170  (red)
-//  Medium temperature    175  -   300  (orange)
-//  High temperature      300  -   400  (yellow)
-//  Very high temperature 400+          (white)
+//      - Cold                  0    -   50   (black)
+//      - Starting temperature  50   -   170  (red)
+//      - Medium temperature    175  -   300  (orange)
+//      - High temperature      300  -   400  (yellow)
+//      - Very high temperature 400+          (white)
 //
 // These cannot be changed at the moment and the simulation caps 
 // the temperature of a single particle at 400 units
@@ -69,6 +76,8 @@ const Vec2 initialParticleSpeed = { 300.0f, 0.0f };
 
 int main(void)
 {
+    #pragma region Initialize libraries
+
     // Initialize GLFW
     if (!glfwInit())
     {
@@ -81,19 +90,17 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); //core profile ==> no standard VA 
 
-    // Create a windowed mode window and its OpenGL context
-    GLFWwindow* window = glfwCreateWindow(1280, 960, "Hello World", nullptr, nullptr);
+    // GLFW stuff
+    GLFWwindow* window = glfwCreateWindow(1280, 960, "", nullptr, nullptr);
     if (!window)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
-
-    // Make the window's context current
     glfwMakeContextCurrent(window);
 
-    // Initialize GLEW
+    // GLEW stuff
     if (glewInit() != GLEW_OK)
     {
         std::cerr << "Failed to initialize GLEW" << std::endl;
@@ -101,88 +108,118 @@ int main(void)
         glfwTerminate();
         return -1;
     }
+    GLCall(glViewport(0, 0, 1280, 960));
 
-    // Print debug information
+    // ImGui stuff
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 430");
+
+    // DEBUG
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
     std::cout << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << std::endl;
-
-    // Set viewport to match window size
-    GLCall(glViewport(0, 0, 1280, 960));
+    std::cout << "ImGui Version : " << ImGui::GetVersion() << std::endl;
+    
+    #pragma endregion
 
     { //additional scope to avoid memory leaks
 
+        #pragma region Initialize simulation
+
         // Initialize simulation
         SimulationSystem sim(totalNumberOfParticles, bottomLeft, topRight, particleRadius, subSteps);
-
-        // Set initial zoom
         sim.SetZoom(zoom);
 
-        // Initialize particle streams
-        if (totalNumberOfParticles < 40)
+        if (addParticleInBulk)
         {
-            sim.AddParticleStream(totalNumberOfParticles, streamSpeed, initialParticleSpeed, particleMass, { 10, 0 });
-        }
-        else if (totalNumberOfParticles < 1000)
-        {
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 0 });
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 30 });
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 60 });
-            sim.AddParticleStream(totalNumberOfParticles / 4, streamSpeed, initialParticleSpeed, particleMass, { 10, 90 });
+            sim.AddBulkParticles(totalNumberOfParticles, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), particleMass);
         }
         else
         {
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 0 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 30 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 60 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 90 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 120 });
-            sim.AddParticleStream(totalNumberOfParticles / 6, streamSpeed, initialParticleSpeed, particleMass, { 10, 150 });
+            const unsigned int numberOfStreams = std::max(std::min(totalNumberOfParticles / 1500, 10u), 1u);
+            for (int i = 0; i < numberOfStreams; i++)
+                sim.AddParticleStream(totalNumberOfParticles / numberOfStreams, streamSpeed, initialParticleSpeed, particleMass, { 10, 5 * particleRadius * i });
         }
-      
-        // Initialize shaders, this is not the most optimal but it works
+
+        // Type changes because it's useless to change the entire structure of the code just for ImGui
+        float simBorderColor[4] = { 1.0f, 1.0f, 1.0f, 0.5f };
+        float simBGColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        bool renderVelocity = true;
+        bool renderTemperature = false;
+
+        // Initialize shader, renderer and time manager
         std::string velShaderPath = "res/shaders/ParticleShaderVelocity.shader";
         std::string tempShaderPath = "res/shaders/ParticleShaderTemperature.shader";
         if (!IsShaderPathOk(tempShaderPath)) return 0;
         if (!IsShaderPathOk(velShaderPath)) return 0;
         Shader velShader(velShaderPath);
         Shader tempShader(tempShaderPath);
-
         Shader* activeShader = renderTemperature ? &tempShader : &velShader;
-        
-        // Initialize particle renderer
-        ParticleRenderer renderer(sim, *activeShader, renderTemperature);
-
-        // Initialize time manager for fixed step
+        std::unique_ptr<ParticleRenderer> renderer =
+            std::make_unique<ParticleRenderer>(sim, *activeShader, renderTemperature);
         Time timeManager(fixedDeltaTime);
         int FPScounter = 0;
 
-        GLCall(glClearColor(simBGColor.r, simBGColor.g, simBGColor.b, simBGColor.a));
+        #pragma endregion
 
         // Main loop
         while (!glfwWindowShouldClose(window))
         {
-            // Update physics before rendering
+            // Update physics before rendering 
             if (!sim.GetIsPaused())
             {
                 int steps = timeManager.update();
                 for (int i = 0; i < steps; i++)
                     sim.Update(timeManager.getFixedDeltaTime());
             }
-            
-            // Process user input 
+
+            // Process user input
             ProcessInput(window, sim, timeManager.getFixedDeltaTime());
 
+            #pragma region Rendering / ImGui / Metrics
+
+            // Pre-Rendering 
+            GLCall(glClearColor(simBGColor[0], simBGColor[1], simBGColor[2], simBGColor[3]));
             GLCall(glClear(GL_COLOR_BUFFER_BIT));
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
 
-            // Render scene with new particle data
-            renderer.UpdateBuffers(fixedDeltaTime);
-            renderer.Render();
+            // Rendering
+            renderer->UpdateBuffers(fixedDeltaTime);
+            renderer->Render();
+            BoundsRenderer(sim.GetBounds().bottomLeft, sim.GetBounds().topRight, 
+                borderWidth, glm::make_vec4(simBorderColor), sim.GetProjMatrix()* sim.GetViewMatrix());
 
-            // render borders with simulation
-            glm::mat4 borderMVP = sim.GetProjMatrix() * sim.GetViewMatrix();
-            const auto& bounds = sim.GetBounds();
-            BoundsRenderer(bounds.bottomLeft, bounds.topRight, borderWidth, simBorderColor, borderMVP);
-            
+            ImGui::Begin("Settings");
+            ImGui::ColorEdit4("Border color", simBorderColor);
+            ImGui::ColorEdit4("Background color", simBGColor);
+            ImGui::Text("Set rendering type : ");
+            ImGui::SameLine();
+
+            bool oldRenderTemperature = renderTemperature;
+            if (ImGui::RadioButton("Velocity", !renderTemperature))
+                renderTemperature = false;
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Temperature", renderTemperature))
+                renderTemperature = true;
+
+            // Not the best implementation but it works
+            if (oldRenderTemperature != renderTemperature) 
+            {
+                renderVelocity = !renderTemperature;
+                activeShader = renderTemperature ? &tempShader : &velShader;
+                renderer = std::make_unique<ParticleRenderer>(sim, *activeShader, renderTemperature);
+            }
+
+
+            ImGui::End();
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
             // Display fps and mspf
             if (++FPScounter > 75)
             {
@@ -190,20 +227,18 @@ int main(void)
                 FPScounter = 0;
             }
 
-            // Swap front and back buffers
             glfwSwapBuffers(window);
-
-            // Poll for and process events
             glfwPollEvents();
+
+            #pragma endregion
         }
     }
 
     // Cleanup
-    // I don't need to unbind any of the objects because when 
-    // I reach the end of the scope that I put at the beginning 
-    // every object will call its destructor and be automatically deleted
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     glfwDestroyWindow(window);
     glfwTerminate();
-
     return 0;
 }

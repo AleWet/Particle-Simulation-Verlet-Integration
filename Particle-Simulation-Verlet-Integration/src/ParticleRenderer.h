@@ -10,13 +10,15 @@
 
 class ParticleRenderer {
 private:
-    struct ParticleInstanceVelocity {
+    struct ParticleInstanceVelocity 
+    {
         Vec2 position;
         Vec2 velocity;
         float size;
     };
 
-    struct ParticleInstanceTemperature {
+    struct ParticleInstanceTemperature 
+    {
         Vec2 position;
         float temperature;
         float size;

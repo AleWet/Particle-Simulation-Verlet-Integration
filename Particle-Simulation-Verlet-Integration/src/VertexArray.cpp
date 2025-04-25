@@ -5,7 +5,6 @@
 VertexArray::VertexArray()
 {
 	GLCall(glGenVertexArrays(1, &m_RendererID));
-
 }
 
 VertexArray::~VertexArray()

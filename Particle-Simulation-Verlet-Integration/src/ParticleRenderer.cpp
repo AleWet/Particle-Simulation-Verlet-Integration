@@ -13,22 +13,26 @@ ParticleRenderer::ParticleRenderer(const SimulationSystem& simulation, const Sha
 ParticleRenderer::~ParticleRenderer()
 {
     // Clean up resources
-    if (m_VertexBuffer) {
+    if (m_VertexBuffer) 
+    {
         delete m_VertexBuffer;
         m_VertexBuffer = nullptr;
     }
 
-    if (m_InstanceBuffer) {
+    if (m_InstanceBuffer) 
+    {
         delete m_InstanceBuffer;
         m_InstanceBuffer = nullptr;
     }
 
-    if (m_IndexBuffer) {
+    if (m_IndexBuffer) 
+    {
         delete m_IndexBuffer;
         m_IndexBuffer = nullptr;
     }
 
-    if (m_VertexArray) {
+    if (m_VertexArray) 
+    {
         delete m_VertexArray;
         m_VertexArray = nullptr;
     }
@@ -41,7 +45,8 @@ void ParticleRenderer::InitBuffers()
 
     // Create a quad (2 triangles) that will be instanced for each particle
     // These vertices define a quad from (-1,-1) to (1,1)
-    float quadVertices[] = {
+    float quadVertices[] = 
+    {
         // positions      // texture coords
         -1.0f, -1.0f,     0.0f, 0.0f,  // bottom left
          1.0f, -1.0f,     1.0f, 0.0f,  // bottom right
@@ -50,7 +55,8 @@ void ParticleRenderer::InitBuffers()
     };
 
     // Create indices for the quad (2 triangles)
-    unsigned int quadIndices[] = {
+    unsigned int quadIndices[] = 
+    {
         0, 1, 2,  // first triangle
         2, 3, 0   // second triangle
     };
@@ -83,17 +89,15 @@ void ParticleRenderer::InitBuffers()
 
     // Set up instance buffer layout
     VertexBufferLayout instanceLayout;
-    instanceLayout.Push<float>(2);  // Position (vec2)
+    instanceLayout.Push<float>(2);      // Position (vec2)
 
     // Configure layout based on rendering mode
-    if (m_RenderTemperature) {
+    if (m_RenderTemperature) 
         instanceLayout.Push<float>(1);  // Temperature (float)
-    }
-    else {
+    else
         instanceLayout.Push<float>(2);  // Velocity (vec2)
-    }
 
-    instanceLayout.Push<float>(1);  // Size (float)
+    instanceLayout.Push<float>(1);      // Size (float)
 
     // Configure the instance buffer attributes
     m_VertexArray->Bind();
@@ -141,9 +145,8 @@ void ParticleRenderer::UpdateBuffers(float deltaTime)
     const std::vector<float>& temperatures = m_Simulation.GetTemperatures();
     const size_t particleCount = positions.size();
 
-    if (particleCount == 0) {
+    if (particleCount == 0)
         return;
-    }
 
     // Calculate the size of each instance based on rendering mode
     size_t instanceStructSize = m_RenderTemperature ?
@@ -156,7 +159,8 @@ void ParticleRenderer::UpdateBuffers(float deltaTime)
         tempData.resize(particleCount);
 
         float particleRadius = m_Simulation.GetParticleRadius();
-        for (size_t i = 0; i < particleCount; i++) {
+        for (size_t i = 0; i < particleCount; i++) 
+        {
             tempData[i].position = positions[i];
             tempData[i].temperature = temperatures[i];
             tempData[i].size = particleRadius;
@@ -167,7 +171,8 @@ void ParticleRenderer::UpdateBuffers(float deltaTime)
         size_t dataSize = sizeof(ParticleInstanceTemperature) * particleCount;
 
         // Only reallocate if buffer is too small
-        if (dataSize > m_InstanceBuffer->GetSize()) {
+        if (dataSize > m_InstanceBuffer->GetSize()) 
+        {
             // Allocate with some growth factor to avoid frequent resizing
             size_t newSize = dataSize * 2;
             glBufferData(GL_ARRAY_BUFFER, newSize, nullptr, GL_STREAM_DRAW);
@@ -179,13 +184,14 @@ void ParticleRenderer::UpdateBuffers(float deltaTime)
     }
     else {
         // Resize only if needed, preserving capacity
-        if (m_InstanceData.size() < particleCount) {
+        if (m_InstanceData.size() < particleCount) 
             m_InstanceData.resize(particleCount);
-        }
+        
 
         // Update instance data with particle positions and velocities
         float particleRadius = m_Simulation.GetParticleRadius();
-        for (size_t i = 0; i < particleCount; i++) {
+        for (size_t i = 0; i < particleCount; i++) 
+        {
             m_InstanceData[i].position = positions[i];
 
             // Calculate velocity from positions (Verlet)
@@ -199,7 +205,8 @@ void ParticleRenderer::UpdateBuffers(float deltaTime)
         size_t dataSize = sizeof(ParticleInstanceVelocity) * particleCount;
 
         // Only reallocate if buffer is too small
-        if (dataSize > m_InstanceBuffer->GetSize()) {
+        if (dataSize > m_InstanceBuffer->GetSize()) 
+        {
             // Allocate with some growth factor to avoid frequent resizing
             size_t newSize = dataSize * 2;
             glBufferData(GL_ARRAY_BUFFER, newSize, nullptr, GL_STREAM_DRAW);
@@ -219,7 +226,8 @@ void ParticleRenderer::Render()
     if (m_Simulation.GetPositions().empty())
         return;
 
-    // Create MVP for particles
+    // Create MVP for particles, there is no model mat because the position is 
+    // stored in the instance data and there are no rotaions or scaling factors
     glm::mat4 particleMVP = m_Simulation.GetProjMatrix() * m_Simulation.GetViewMatrix();
 
     // Bind shader and set uniforms

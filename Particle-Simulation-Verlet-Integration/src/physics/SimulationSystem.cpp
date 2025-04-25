@@ -123,6 +123,43 @@ void SimulationSystem::AddParticleStream(int totalParticles, float spawnRate, co
     m_Streams.push_back(newStream);
 }
 
+void SimulationSystem::AddBulkParticles(unsigned int count, const Vec2& initialVelocity, const Vec2& acceleration, float mass)
+{
+    // Reserve space for new particles
+    size_t currentSize = m_Positions.size();
+    if (m_Positions.size() + count > m_Positions.capacity()) {
+        m_Positions.reserve(currentSize + count);
+        m_PrevPositions.reserve(currentSize + count);
+        m_Accelerations.reserve(currentSize + count);
+        m_Masses.reserve(currentSize + count);
+        m_Temperatures.reserve(currentSize + count);
+        m_Densities.reserve(currentSize + count);
+        m_Pressures.reserve(currentSize + count);
+    }
+
+    // Define the safe spawn area 
+    float minX = m_Bounds.bottomLeft.x + m_ParticleRadius * 1.5f;
+    float maxX = m_Bounds.topRight.x - m_ParticleRadius * 1.5f;
+    float minY = m_Bounds.bottomLeft.y + m_ParticleRadius * 1.5f;
+    float maxY = m_Bounds.topRight.y - m_ParticleRadius * 1.5f;
+
+    // Random stuff
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> xDist(minX, maxX);
+    std::uniform_real_distribution<float> yDist(minY, maxY);
+
+    // Adding stuff
+    for (unsigned int i = 0; i < count; i++) {
+        Vec2 position(xDist(gen), yDist(gen));
+        AddParticle(position, initialVelocity, acceleration, mass);
+        m_CurrentNumOfParticles++;
+    }
+
+    // Mark the spatial grid for reinitialization
+    m_SpatialGridInitialized = false;
+}
+
 void SimulationSystem::UpdateStreams(float deltaTime)
 {
     for (auto& stream : m_Streams) {

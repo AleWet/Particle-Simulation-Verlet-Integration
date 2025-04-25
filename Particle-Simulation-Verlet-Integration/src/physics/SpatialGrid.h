@@ -16,7 +16,7 @@ private:
 	unsigned int m_NumberOfParticles;
 	std::vector<std::pair<int, int>> m_CollisionPairs;
 	std::vector<std::vector<unsigned int>> m_Grid; // store particles with index in 1D array
-	std::vector<int> m_ParticleCells;  // Track which cell each particle is in
+	std::vector<int> m_ParticleCells;			   // Track which cell each particle is in
 
 public:
 	SpatialGrid(unsigned int numberOfParticles, float particleRadius, const Vec2& minBound, const Vec2& maxBound)
@@ -62,9 +62,9 @@ public:
 	// Clear grid cell but don't delete it
 	void Clear()
 	{
-		for (auto& cell : m_Grid) {
+		for (auto& cell : m_Grid) 
 			cell.clear();
-		}
+
 		m_CollisionPairs.clear();
 		std::fill(m_ParticleCells.begin(), m_ParticleCells.end(), -1);
 	}
@@ -84,6 +84,6 @@ public:
 	// Get particle count of a certain cell
 	unsigned int GetParticleCount() const { return m_NumberOfParticles; }
 
-	// Get cells
+	// Get grid
 	const std::vector<std::vector<unsigned int>>& GetGrid() const { return m_Grid; }
 };

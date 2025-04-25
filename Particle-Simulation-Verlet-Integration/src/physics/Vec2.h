@@ -23,19 +23,16 @@ struct Vec2 {
     inline float length_sq() const { return x * x + y * y; }
 
     // Normalize the vector
-    inline Vec2 normalized() const {
+    inline Vec2 normalized() const 
+    {
         float len = length();
         if (len < 1e-6f) return *this;
         return { x / len, y / len };
     }
 
     // Dot product
-    inline float dot(const Vec2& other) const {
-        return x * other.x + y * other.y;
-    }
+    inline float dot(const Vec2& other) const { return x * other.x + y * other.y; }
 
     // Static method to create a vector from angle (radians)
-    inline static Vec2 fromAngle(float angle) {
-        return { std::cos(angle), std::sin(angle) };
-    }
+    inline static Vec2 fromAngle(float angle) { return { std::cos(angle), std::sin(angle) }; }
 };

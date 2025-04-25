@@ -18,7 +18,7 @@ int Time::update()
 {
     double currentTime = glfwGetTime();
     float frameTime = static_cast<float>(currentTime - m_LastTime);
-    frameTime = std::min(frameTime, 0.25f); // Cap at 250ms prevent errors (?)
+    frameTime = std::min(frameTime, 0.25f); // Cap at 250ms prevent errors
     m_LastTime = currentTime;
     m_LastFrameTime = frameTime;
 
@@ -26,17 +26,17 @@ int Time::update()
     m_FrameTimeHistory.push_back(frameTime);
 
     // Keep history at maximum size by removing oldest entries
-    while (m_FrameTimeHistory.size() > m_MaxFrameHistorySize) {
+    while (m_FrameTimeHistory.size() > m_MaxFrameHistorySize) 
         m_FrameTimeHistory.pop_front();
-    }
+    
 
     m_Accumulator += frameTime;
     // Calculate the number of fixed steps needed to cover the elapsed time.
     int steps = std::min(MAXSTEPS, static_cast<int>(std::floor(m_Accumulator / m_FixedDeltaTime)));
     // Remove the time used by these fixed steps from the accumulator.
-    if (steps > 0) {
+    if (steps > 0) 
         m_Accumulator -= steps * m_FixedDeltaTime;
-    }
+    
     return steps;
 }
 

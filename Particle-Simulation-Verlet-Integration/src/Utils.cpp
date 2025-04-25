@@ -5,7 +5,7 @@ bool IsShaderPathOk(std::string shaderPath)
     std::ifstream fileCheck(shaderPath);
     if (!fileCheck.good()) {
         std::cerr << "Error: Cannot open shader file: " << shaderPath << std::endl;
-        // Handle the error - maybe set a flag or throw an exception
+        // Handle the error (set a flag or throw an exception)
         return false;
     }
     return true;
@@ -92,7 +92,7 @@ void BoundsRenderer(Vec2 bottomLeft, Vec2 topRight, float borderWidth,
         borderVA->AddBuffer(*borderVB, layout);
 
         // Define indices to form triangles for the border
-        // We connect inner and outer points to form the border
+        // Connect inner and outer points to form the border
         unsigned int indices[] = {
             // Bottom border
             0, 1, 5,
@@ -164,10 +164,10 @@ void UpdateWindowTitle(GLFWwindow* window, const Time& timeManager, unsigned int
         title += " [Good]    "; // Fixed width padding
     }
     else if (avgFPS >= targetFPS * 0.8f) {
-        title += " [Average] "; // Same width as other indicators
+        title += " [Average] "; // Same 
     }
     else {
-        title += " [Poor]    "; // Same width as other indicators
+        title += " [Poor]    "; // Same 
     }
 
     // Add current number of particles
@@ -215,7 +215,7 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    // Helper function 
+    // Helper 
     UpdateMousePosition(window, sim);
 
     static bool spaceKeyPressed = false;

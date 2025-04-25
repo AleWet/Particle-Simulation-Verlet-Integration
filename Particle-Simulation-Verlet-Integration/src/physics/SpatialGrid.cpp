@@ -20,9 +20,9 @@ void SpatialGrid::InitCells(std::vector<Vec2>& particlePositions)
             m_Grid[cellIndex].push_back(i);
 
             // Store the current cell for each particle
-            if (m_ParticleCells.size() <= i) {
+            if (m_ParticleCells.size() <= i)
                 m_ParticleCells.resize(i + 1);
-            }
+
             m_ParticleCells[i] = cellIndex;
         }
     }
@@ -30,15 +30,16 @@ void SpatialGrid::InitCells(std::vector<Vec2>& particlePositions)
 
 void SpatialGrid::UpdateCells(std::vector<Vec2>& particlePositions)
 {
-    // Ensure our particle cell tracking array is large enough
-    if (m_ParticleCells.size() < particlePositions.size()) {
+    // Ensure particle cell tracking array is large enough
+    if (m_ParticleCells.size() < particlePositions.size()) 
+    {
         size_t oldSize = m_ParticleCells.size();
         m_ParticleCells.resize(particlePositions.size());
 
         // Initialize new particles with invalid cell index
-        for (size_t i = oldSize; i < m_ParticleCells.size(); i++) {
-            m_ParticleCells[i] = -1;  // Invalid cell index
-        }
+        for (size_t i = oldSize; i < m_ParticleCells.size(); i++) 
+            m_ParticleCells[i] = -1;  // Invalid 
+        
     }
 
     // Check each particle for cell changes

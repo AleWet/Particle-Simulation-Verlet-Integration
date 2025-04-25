@@ -1,5 +1,5 @@
 #shader vertex
-#version 330 core
+#version 430 core
 
 // Quad vertex attributes
 layout(location = 0) in vec2 a_Position;     // Quad vertex positions
@@ -33,7 +33,7 @@ void main()
 }
 
 #shader fragment
-#version 330 core
+#version 430 core
 
 in vec2 v_TexCoord;
 in float v_Temperature;  

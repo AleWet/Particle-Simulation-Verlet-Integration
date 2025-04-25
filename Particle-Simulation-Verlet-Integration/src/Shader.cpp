@@ -53,7 +53,7 @@ ShaderProgramSource Shader::ParseShader(const std::string& filepath)
         else //add code to current shader
         {
             int indexShader = (int)type; //cast shaderType to int -> index of the ss
-            ss[indexShader] << line << '\n';
+            ss[indexShader] << line << '\n'; // I don't know why this line is marked
         }
     }
     return { ss[0].str(), ss[1].str() }; // return struct

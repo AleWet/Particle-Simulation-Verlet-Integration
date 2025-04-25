@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include <random>
 #include "VerletParticle.h"
 #include "Vec2.h"
 #include "SpatialGrid.h" 
@@ -41,9 +42,9 @@ private:
     std::vector<Vec2> m_PrevPositions;
     std::vector<Vec2> m_Accelerations;
     std::vector<float> m_Masses;
+    std::vector<float> m_Temperatures;
 
     // Not implented yet
-    std::vector<float> m_Temperatures;
     std::vector<float> m_Densities;
     std::vector<float> m_Pressures;
 
@@ -61,7 +62,6 @@ private:
 
     std::vector<ParticleStream> m_Streams;
 
-    // SpatialGrid
     SpatialGrid m_SpatialGrid;
     bool m_SpatialGridInitialized;
 
@@ -96,13 +96,15 @@ public:
     const std::vector<float>& GetPressures() const { return m_Pressures; }
     std::vector<float>& GetPressures() { return m_Pressures; }
 
-
     // Get simulation bounds
     const Bounds GetBounds() const { return m_Bounds; }
 
     // Add new particle stream
     void AddParticleStream(int totalParticles, float spawnRate, const Vec2& initialVelocity,
         float mass, const Vec2& initialOffset);
+
+    // Add the desired amount of particles all at once
+    void AddBulkParticles(unsigned int count, const Vec2& initialVelocity, const Vec2& acceleration, float mass);
 
     // Update the UpdateStream method
     void UpdateStreams(float deltaTime);
@@ -202,5 +204,4 @@ public:
 
     // Get if mouse RIGHT click is down
     void SetIsMouseRightClicked(bool isClicked) { m_IsRightButtonClicked = isClicked; }
-
 };

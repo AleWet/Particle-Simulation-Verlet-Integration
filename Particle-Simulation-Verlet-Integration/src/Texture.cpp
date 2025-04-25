@@ -39,10 +39,8 @@ Texture::Texture(const std::string& path)
 	GLCall(glBindTexture(GL_TEXTURE_2D, 0));
 	// unbind texture
 
-	if (m_LocalBuffer) // if this buffer has data
-	{
+	if (m_LocalBuffer)					// if this buffer has data
 		stbi_image_free(m_LocalBuffer); // free local buffer (?????)
-	}
 }
 
 Texture::~Texture()

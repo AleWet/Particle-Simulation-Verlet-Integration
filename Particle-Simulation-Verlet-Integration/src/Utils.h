@@ -25,6 +25,8 @@ bool IsShaderPathOk(std::string shaderPath);
 void BoundsRenderer(Vec2 bottomLeft, Vec2 topRight, float borderWidth,
     glm::vec4 color, const glm::mat4& simulationViewMatrix);
 
+// Update window title to display fps and mspf
 void UpdateWindowTitle(GLFWwindow* window, const Time& timeManager, unsigned int currentNumOfParticles, const std::string& appName = "Particle Simulation");
 
+// In the future this could be in a seperate file called "UserInput"
 void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime);
