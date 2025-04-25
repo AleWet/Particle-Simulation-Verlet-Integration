@@ -16,6 +16,7 @@ https://github.com/user-attachments/assets/eddf0975-4d7c-405f-9e6f-a205fee8867f
 - **Customizable Simulation Parameters** (set before compilation)
 - **GLFW & GLEW for OpenGL rendering**
 - **GLM for mathematical computations** (on top of a custom math library)
+- **ImGui** for the user interface
 
 ## Dependencies
 The project requires the following libraries, all included in the `Dependencies` folder:
@@ -58,15 +59,10 @@ Before running the simulator, ensure the following settings are correctly config
 - Spacebar to apply a central force to all particles (press and hold)
 - Mouse Left Click to apply an attractive force centered on the cursor
 - Mouse Right Click to apply a repuslive force centerd on the cursor
-- Simulation parameters must be set **before compilation** within the `application.cpp` file under **SIMULATION PARAMETERS**:
-```cpp
-// Simulation parameters
-const float fixedDeltaTime = 1.0f / 60.0f;
-const unsigned int subSteps = 2;
-(...)
-```
-The parameters cannot be modified at runtime. Modify them in the source code and recompile to apply changes.
-Physics constants can be modified in Constants.h and their implementation file.
+
+**ImGui Interface**  
+This part is still being developed, at the moment you can interact with the following parameters:
+Background and border colors, Border width, Visualization mode (Velocity/Temperature), Bulk or Stream spawning methods, Particle count control, Stream speed and initial velocity (for Stream mode), Reset Button: Restart the simulation with current settings
 
 ## Known Issues & Limitations
 - **Performance Limit:** The simulation struggles with more than **7500 particles** with 8 substeps (with debugger).
