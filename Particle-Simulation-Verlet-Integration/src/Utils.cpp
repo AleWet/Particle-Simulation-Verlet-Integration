@@ -310,3 +310,18 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     }
     pKeyPressed = isPCurrentlyPressed; 
 }
+
+// Function to reset the simulation with current parameters
+void ResetSimulation(SimulationSystem& sim, float zoom, bool bulk, bool stream, float streamSpeed, Vec2 InitialSpeed, float mass, unsigned int totalParticles, float particleRad) {
+    sim.Reset();
+    sim.SetZoom(zoom);
+
+    if (bulk) {
+        sim.AddBulkParticles(totalParticles, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), mass);
+    }
+    else if (stream) {
+        const unsigned int numberOfStreams = std::max(std::min(totalParticles / 1500, 10u), 1u);
+        for (int i = 0; i < numberOfStreams; i++)
+            sim.AddParticleStream(totalParticles / numberOfStreams, streamSpeed, InitialSpeed, mass, { 10, 5 * particleRad * i });
+    }
+}

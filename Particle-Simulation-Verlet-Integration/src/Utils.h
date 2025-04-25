@@ -30,3 +30,6 @@ void UpdateWindowTitle(GLFWwindow* window, const Time& timeManager, unsigned int
 
 // In the future this could be in a seperate file called "UserInput"
 void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime);
+
+void ResetSimulation(SimulationSystem& sim, float zoom, bool bulk, bool stream, 
+    float streamSpeed, Vec2 InitialSpeed, float mass, unsigned int totalParticles, float particleRad);

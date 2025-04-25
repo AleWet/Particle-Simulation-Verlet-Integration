@@ -30,19 +30,10 @@
 
 // ======================= SIMULATION PARAMETERS =======================
 
-float fixedDeltaTime = 1.0f / 60.0f;
-unsigned int subSteps = 8;                        // Recommended 
+float fixedDeltaTime = 1.0f / 60.0f; // This will probably remain an unchangeable constant
 
-// Choose one between the two ways of adding particles to the 
-// simulation, for smoother results the particleStream is 
-// recommended. The number of particle streams is proportional 
-// to the total numeber of particles
-bool addParticleInBulk = true;
-bool addParticleInStream = false;
 
-unsigned int totalNumberOfParticles = 10000;
-const float particleRadius = 2.7f;
-const float particleMass = 1.0f;
+unsigned int subSteps = 8;
 
 const float initialZoom = 0.6f;
 const float simWidth = 1000.0f;
@@ -50,11 +41,7 @@ const float simHeight = 1000.0f;
 const Vec2 bottomLeft(-simWidth / 2, -simHeight / 2);
 const Vec2 topRight(simWidth / 2, simHeight / 2);
 
-float borderWidth = 2.0f;
-float streamSpeed = 18.0f;                        // Recommended
-Vec2 initialParticleSpeed = { 300.0f, 0.0f };
-
-// ------ HARDCODED CONSTANTS ------
+// ======================= HARDCODED CONSTANTS =======================
 // 
 // the rendered color of the temperature ranges are:
 // 
@@ -62,30 +49,13 @@ Vec2 initialParticleSpeed = { 300.0f, 0.0f };
 //      - Starting temperature  50   -   170  (red)
 //      - Medium temperature    175  -   300  (orange)
 //      - High temperature      300  -   400  (yellow)
-//      - Very high temperature 400+          (white)
+//      - Very high temperature 400           (white)
 //
 // These cannot be changed at the moment and the simulation caps 
 // the temperature of a single particle at 400 units
 
+// ===================================================================
 
-// physics constants can be changed in the Constants.cpp file in the physics folder
-// =====================================================================
-
-
-// Function to reset the simulation with current parameters
-void ResetSimulation(SimulationSystem& sim, float zoom) {
-    sim.Reset();
-    sim.SetZoom(zoom);
-
-    if (addParticleInBulk) {
-        sim.AddBulkParticles(totalNumberOfParticles, Vec2(0.0f, 0.0f), Vec2(0.0f, 0.0f), particleMass);
-    }
-    else if (addParticleInStream) {
-        const unsigned int numberOfStreams = std::max(std::min(totalNumberOfParticles / 1500, 10u), 1u);
-        for (int i = 0; i < numberOfStreams; i++)
-            sim.AddParticleStream(totalNumberOfParticles / numberOfStreams, streamSpeed, initialParticleSpeed, particleMass, { 10, 5 * particleRadius * i });
-    }
-}
 
 int main(void)
 {
@@ -141,7 +111,26 @@ int main(void)
     { //additional scope to avoid memory leaks
 
         #pragma region Initialize simulation
+      
+        // Type changes because it's useless to change the entire structure of the code just for ImGui
+        float simBorderColor[4] = { 1.0f, 1.0f, 1.0f, 0.5f };
+        float borderWidth = 2.0f;
+        float simBGColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        Vec2 initialParticleSpeed = { 300.0f, 0.0f }; // only with particle stream
+        float particleSpeedValues[2] = { initialParticleSpeed.x, initialParticleSpeed.y };
+        float streamSpeed = 18.0f;
+        bool addParticleInStream = false;
 
+        unsigned int totalNumberOfParticles = 10000;
+        const float particleRadius = 2.7f;
+        const float particleMass = 1.0f;
+        
+        bool addParticleInBulk = true;
+        bool renderVelocity = true;
+        bool renderTemperature = false;
+        bool needsReset = false;
+        
+        
         // Initialize simulation
         SimulationSystem sim(totalNumberOfParticles, bottomLeft, topRight, particleRadius, subSteps);
         sim.SetZoom(initialZoom);
@@ -156,16 +145,6 @@ int main(void)
             for (int i = 0; i < numberOfStreams; i++)
                 sim.AddParticleStream(totalNumberOfParticles / numberOfStreams, streamSpeed, initialParticleSpeed, particleMass, { 10, 5 * particleRadius * i });
         }
-
-        // Type changes because it's useless to change the entire structure of the code just for ImGui
-        float simBorderColor[4] = { 1.0f, 1.0f, 1.0f, 0.5f };
-        float simBGColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-        bool renderVelocity = true;
-        bool renderTemperature = false;
-        bool needsReset = false;
-
-        // For particle speed vector input
-        float particleSpeedValues[2] = { initialParticleSpeed.x, initialParticleSpeed.y };
 
         // Initialize shader, renderer and time manager
         std::string velShaderPath = "res/shaders/ParticleShaderVelocity.shader";
@@ -240,7 +219,8 @@ int main(void)
             ImGui::Separator();
 
             // Particle spawning options
-            ImGui::Text("Particle spawn method:");
+            ImGui::Text("Particle spawn method:"); 
+            ImGui::SameLine();
             bool oldBulkSetting = addParticleInBulk;
             bool oldStreamSetting = addParticleInStream;
 
@@ -284,7 +264,8 @@ int main(void)
             const float buttonWidth = ImGui::GetContentRegionAvail().x;
             if (ImGui::Button("Reset Simulation", ImVec2(buttonWidth, 30)))
             {
-                ResetSimulation(sim, initialZoom);
+                ResetSimulation(sim, initialZoom, addParticleInBulk, addParticleInStream, 
+                    streamSpeed, initialParticleSpeed, particleMass, totalNumberOfParticles, particleRadius);
                 needsReset = false;
                 timeManager = Time(fixedDeltaTime);
             }
