@@ -227,11 +227,11 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
     // Z/X keys to adjust zoom
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
     {
-        sim.SetZoom(sim.GetZoom() * (1.0f - 0.001));
+        sim.SetZoom(sim.GetZoom() * (1.0f - 0.002));
     }
     if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
     {
-        sim.SetZoom(sim.GetZoom() * (1.0f + 0.001));
+        sim.SetZoom(sim.GetZoom() * (1.0f + 0.002));
     }
 
     // Handle camera movement with arrow keys

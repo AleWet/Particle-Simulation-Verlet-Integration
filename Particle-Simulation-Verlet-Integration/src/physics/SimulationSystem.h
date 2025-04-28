@@ -158,6 +158,9 @@ public:
     // Return simulation substeps
     unsigned int GetSubSteps() const { return m_subSteps; }
 
+    // Set simulation Substeps
+    void SetSubSteps(unsigned int newSub) { m_subSteps = newSub;}
+
     // Return the number of particles currently inside the simulation
     unsigned int GetCurNumOfParticles() const { return m_CurrentNumOfParticles; }
 
@@ -207,4 +210,36 @@ public:
 
     // Get if mouse RIGHT click is down
     void SetIsMouseRightClicked(bool isClicked) { m_IsRightButtonClicked = isClicked; }
+
+    // Set new simHeight
+    void SetSimHeight(float h)
+    {
+        Vec2 center = GetSimCenter();
+        m_SimHeight = h;
+
+        // Recalculate bounds based on center
+        m_Bounds.bottomLeft = Vec2(center.x - m_SimWidth / 2, center.y - m_SimHeight / 2);
+        m_Bounds.topRight = Vec2(center.x + m_SimWidth / 2, center.y + m_SimHeight / 2);
+
+        // Reset spatial grid since bounds have changed
+        m_SpatialGridInitialized = false;
+    }
+
+    // Set new simWidth
+    void SetSimWidth(float w)
+    {
+        Vec2 center = GetSimCenter();
+        m_SimWidth = w;
+
+        // Adjust zoom proportionally to maintain the same visual width
+        m_Zoom *= w / m_SimWidth;
+
+        // Recalculate bounds based on center
+        m_Bounds.bottomLeft = Vec2(center.x - m_SimWidth / 2, center.y - m_SimHeight / 2);
+        m_Bounds.topRight = Vec2(center.x + m_SimWidth / 2, center.y + m_SimHeight / 2);
+
+        // Reset spatial grid since bounds have changed
+        m_SpatialGridInitialized = false;
+    }
+    
 };

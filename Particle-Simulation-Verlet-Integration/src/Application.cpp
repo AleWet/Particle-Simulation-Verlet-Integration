@@ -12,6 +12,7 @@
 #include "Utils.h"
 
 #include "physics/SimulationSystem.h"
+#include "physics/Constants.h"
 #include "core/Time.h"
 
 #include "VertexBuffer.h"
@@ -30,16 +31,11 @@
 
 // ======================= SIMULATION PARAMETERS =======================
 
-float fixedDeltaTime = 1.0f / 60.0f; // This will probably remain an unchangeable constant
+const float fixedDeltaTime = 1.0f / 60.0f; // This will probably remain an unchangeable constant
 
-
-unsigned int subSteps = 8;
-
-const float initialZoom = 0.6f;
-const float simWidth = 1000.0f;
-const float simHeight = 1000.0f;
-const Vec2 bottomLeft(-simWidth / 2, -simHeight / 2);
-const Vec2 topRight(simWidth / 2, simHeight / 2);
+// TBD
+const float particleRadius = 2.7f;
+const float particleMass = 1.0f;
 
 // ======================= HARDCODED CONSTANTS =======================
 // 
@@ -121,9 +117,13 @@ int main(void)
         float streamSpeed = 18.0f;
         bool addParticleInStream = false;
 
-        unsigned int totalNumberOfParticles = 10000;
-        const float particleRadius = 2.7f;
-        const float particleMass = 1.0f;
+        unsigned int totalNumberOfParticles = 1000;
+
+        int subSteps = 8;
+        float simWidth = 1000.0f;
+        float simHeight = 1000.0f;
+        Vec2 bottomLeft(-simWidth / 2, -simHeight / 2);
+        Vec2 topRight(simWidth / 2, simHeight / 2);
         
         bool addParticleInBulk = true;
         bool renderVelocity = true;
@@ -133,7 +133,7 @@ int main(void)
         
         // Initialize simulation
         SimulationSystem sim(totalNumberOfParticles, bottomLeft, topRight, particleRadius, subSteps);
-        sim.SetZoom(initialZoom);
+        sim.SetZoom(0.6f); // Just looks better
 
         if (addParticleInBulk)
         {
@@ -191,7 +191,70 @@ int main(void)
                 borderWidth, glm::make_vec4(simBorderColor), sim.GetProjMatrix() * sim.GetViewMatrix());
 
             ImGui::Begin("Settings");
+            ImGui::Text("General :");
 
+            // Particle spawning options
+            ImGui::Text("Particle spawn method:");
+            ImGui::SameLine();
+            bool oldBulkSetting = addParticleInBulk;
+            bool oldStreamSetting = addParticleInStream;
+
+            if (ImGui::RadioButton("Bulk", addParticleInBulk))
+            {
+                addParticleInBulk = true;
+                addParticleInStream = false;
+                needsReset = true;
+            }
+            ImGui::SameLine();
+            if (ImGui::RadioButton("Stream", addParticleInStream))
+            {
+                addParticleInBulk = false;
+                addParticleInStream = true;
+                needsReset = true;
+            }
+
+            // Total number of particles
+            unsigned int oldParticleCount = totalNumberOfParticles;
+            ImGui::InputScalar("Total Particles", ImGuiDataType_U32, &totalNumberOfParticles, NULL, NULL, "%u");
+            if (oldParticleCount != totalNumberOfParticles)
+                needsReset = true;
+
+            // Stream parameters (only show if stream is selected)
+            if (addParticleInStream)
+            {
+                ImGui::SliderFloat("Stream Speed", &streamSpeed, 5.0f, 50.0f, "%.1f");
+
+                // Particle initial velocity
+                if (ImGui::InputFloat2("Initial Particle Speed", particleSpeedValues))
+                {
+                    initialParticleSpeed.x = particleSpeedValues[0];
+                    initialParticleSpeed.y = particleSpeedValues[1];
+                    needsReset = true;
+                }
+            }
+            
+            // Substeps
+            if (ImGui::SliderInt("Substeps", &subSteps, 1, 10, "%1"))
+                sim.SetSubSteps(subSteps);
+
+            // Simulation size
+            if (ImGui::SliderFloat("heigth", &simHeight, 10, 5000, "%.1f"))
+                sim.SetSimHeight(simHeight);
+
+            if (ImGui::SliderFloat("width", &simWidth, 10, 5000, "%.1f"))
+                sim.SetSimWidth(simWidth);
+            
+
+            const float buttonWidth = ImGui::GetContentRegionAvail().x;
+            if (ImGui::Button("Reset Simulation", ImVec2(buttonWidth, 30)))
+            {
+                ResetSimulation(sim, 0.6f, addParticleInBulk, addParticleInStream,
+                    streamSpeed, initialParticleSpeed, particleMass, totalNumberOfParticles, particleRadius);
+                needsReset = false;
+                timeManager = Time(fixedDeltaTime);
+            }
+
+            ImGui::Separator();
             ImGui::Text("Rendering : ");
             ImGui::ColorEdit4("Background color", simBGColor);
             ImGui::ColorEdit4("Border color", simBorderColor);
@@ -214,60 +277,6 @@ int main(void)
                 renderVelocity = !renderTemperature;
                 activeShader = renderTemperature ? &tempShader : &velShader;
                 renderer = std::make_unique<ParticleRenderer>(sim, *activeShader, renderTemperature);
-            }
-
-            ImGui::Separator();
-
-            // Particle spawning options
-            ImGui::Text("Particle spawn method:"); 
-            ImGui::SameLine();
-            bool oldBulkSetting = addParticleInBulk;
-            bool oldStreamSetting = addParticleInStream;
-
-            if (ImGui::RadioButton("Bulk", addParticleInBulk))
-            {
-                addParticleInBulk = true;
-                addParticleInStream = false;
-                needsReset = true;
-            }
-            ImGui::SameLine();
-            if (ImGui::RadioButton("Stream", addParticleInStream))
-            {
-                addParticleInBulk = false;
-                addParticleInStream = true;
-                needsReset = true;
-            }
-
-            // Simulation parameters
-            ImGui::Text("Simulation Parameters:");
-
-            // Total number of particles
-            unsigned int oldParticleCount = totalNumberOfParticles;
-            ImGui::InputScalar("Total Particles", ImGuiDataType_U32, &totalNumberOfParticles, NULL, NULL, "%u");
-            if (oldParticleCount != totalNumberOfParticles) 
-                needsReset = true;
-            
-            // Stream-specific parameters (only show if stream is selected)
-            if (addParticleInStream) 
-            {
-                ImGui::SliderFloat("Stream Speed", &streamSpeed, 5.0f, 50.0f, "%.1f");
-
-                // Particle initial velocity
-                if (ImGui::InputFloat2("Initial Particle Speed", particleSpeedValues)) 
-                {
-                    initialParticleSpeed.x = particleSpeedValues[0];
-                    initialParticleSpeed.y = particleSpeedValues[1];
-                    needsReset = true;
-                }
-            }
-
-            const float buttonWidth = ImGui::GetContentRegionAvail().x;
-            if (ImGui::Button("Reset Simulation", ImVec2(buttonWidth, 30)))
-            {
-                ResetSimulation(sim, initialZoom, addParticleInBulk, addParticleInStream, 
-                    streamSpeed, initialParticleSpeed, particleMass, totalNumberOfParticles, particleRadius);
-                needsReset = false;
-                timeManager = Time(fixedDeltaTime);
             }
 
             ImGui::End();
