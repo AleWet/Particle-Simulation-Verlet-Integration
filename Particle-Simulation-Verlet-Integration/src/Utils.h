@@ -7,10 +7,10 @@
 #include <string>
 #include <sstream>
 
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "VertexBufferLayout.h"
+#include "graphics/VertexBuffer.h"
+#include "graphics/IndexBuffer.h"
+#include "graphics/VertexArray.h"
+#include "graphics/VertexBufferLayout.h"
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/glm.hpp"

@@ -7,20 +7,20 @@
 #include <string>
 #include <sstream>
 
-#include "Renderer.h"
-#include "ParticleRenderer.h"
+#include "graphics/Renderer.h"
+#include "graphics/ParticleRenderer.h"
 #include "Utils.h"
 
 #include "physics/SimulationSystem.h"
 #include "physics/Constants.h"
 #include "core/Time.h"
 
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "VertexBufferLayout.h"
-#include "Shader.h"
-#include "Texture.h"
+#include "graphics/VertexBuffer.h"
+#include "graphics/IndexBuffer.h"
+#include "graphics/VertexArray.h"
+#include "graphics/VertexBufferLayout.h"
+#include "graphics/Shader.h"
+#include "graphics/Texture.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -176,7 +176,7 @@ int main(void)
             // Process user input
             ProcessInput(window, sim, timeManager.getFixedDeltaTime());
 
-#pragma region Rendering / ImGui / Metrics
+            #pragma region Rendering / ImGui / Metrics
 
             // Pre-Rendering 
             GLCall(glClearColor(simBGColor[0], simBGColor[1], simBGColor[2], simBGColor[3]));

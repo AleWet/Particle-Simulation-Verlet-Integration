@@ -2,7 +2,7 @@
 #include <vector>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
-#include "physics/SimulationSystem.h"
+#include "../physics/SimulationSystem.h"
 #include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
