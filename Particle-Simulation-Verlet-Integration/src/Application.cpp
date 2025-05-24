@@ -34,8 +34,7 @@
 const float fixedDeltaTime = 1.0f / 60.0f; // This will probably remain an unchangeable constant
 
 // TBD
-const float particleRadius = 2.7f;
-const float particleMass = 1.0f;
+
 
 // ======================= HARDCODED CONSTANTS =======================
 // 
@@ -109,6 +108,8 @@ int main(void)
         #pragma region Initialize simulation
       
         // Type changes because it's useless to change the entire structure of the code just for ImGui
+        float particleRadius = 2.7f;
+        float particleMass = 1.0f;
         float simBorderColor[4] = { 1.0f, 1.0f, 1.0f, 0.5f };
         float borderWidth = 2.0f;
         float simBGColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -175,7 +176,7 @@ int main(void)
             // Process user input
             ProcessInput(window, sim, timeManager.getFixedDeltaTime());
 
-            #pragma region Rendering / ImGui / Metrics
+#pragma region Rendering / ImGui / Metrics
 
             // Pre-Rendering 
             GLCall(glClearColor(simBGColor[0], simBGColor[1], simBGColor[2], simBGColor[3]));
@@ -191,93 +192,163 @@ int main(void)
                 borderWidth, glm::make_vec4(simBorderColor), sim.GetProjMatrix() * sim.GetViewMatrix());
 
             ImGui::Begin("Settings");
-            ImGui::Text("General :");
-
-            // Particle spawning options
-            ImGui::Text("Particle spawn method:");
-            ImGui::SameLine();
-            bool oldBulkSetting = addParticleInBulk;
-            bool oldStreamSetting = addParticleInStream;
-
-            if (ImGui::RadioButton("Bulk", addParticleInBulk))
+            if (ImGui::CollapsingHeader("General"))
             {
-                addParticleInBulk = true;
-                addParticleInStream = false;
-                needsReset = true;
-            }
-            ImGui::SameLine();
-            if (ImGui::RadioButton("Stream", addParticleInStream))
-            {
-                addParticleInBulk = false;
-                addParticleInStream = true;
-                needsReset = true;
-            }
+                // Particle radius and mass
+                if (ImGui::SliderFloat("Particle Radius", &particleRadius, 1.0f, 100.0f, "%.1f"))
+                    sim.SetParticleRadius(particleRadius);
+                if (ImGui::SliderFloat("Particle Mass", &particleMass, 1.0f, 100.0f, "%.1f"))
+                    sim.UpdateMass(particleMass);
 
-            // Total number of particles
-            unsigned int oldParticleCount = totalNumberOfParticles;
-            ImGui::InputScalar("Total Particles", ImGuiDataType_U32, &totalNumberOfParticles, NULL, NULL, "%u");
-            if (oldParticleCount != totalNumberOfParticles)
-                needsReset = true;
+                // Particle spawning options
+                ImGui::Text("Particle spawn method:");
+                ImGui::SameLine();
+                bool oldBulkSetting = addParticleInBulk;
+                bool oldStreamSetting = addParticleInStream;
 
-            // Stream parameters (only show if stream is selected)
-            if (addParticleInStream)
-            {
-                ImGui::SliderFloat("Stream Speed", &streamSpeed, 5.0f, 50.0f, "%.1f");
-
-                // Particle initial velocity
-                if (ImGui::InputFloat2("Initial Particle Speed", particleSpeedValues))
+                if (ImGui::RadioButton("Bulk", addParticleInBulk))
                 {
-                    initialParticleSpeed.x = particleSpeedValues[0];
-                    initialParticleSpeed.y = particleSpeedValues[1];
+                    addParticleInBulk = true;
+                    addParticleInStream = false;
                     needsReset = true;
                 }
-            }
-            
-            // Substeps
-            if (ImGui::SliderInt("Substeps", &subSteps, 1, 10, "%1"))
-                sim.SetSubSteps(subSteps);
+                ImGui::SameLine();
+                if (ImGui::RadioButton("Stream", addParticleInStream))
+                {
+                    addParticleInBulk = false;
+                    addParticleInStream = true;
+                    needsReset = true;
+                }
 
-            // Simulation size
-            if (ImGui::SliderFloat("heigth", &simHeight, 10, 5000, "%.1f"))
-                sim.SetSimHeight(simHeight);
+                // Total number of particles
+                unsigned int oldParticleCount = totalNumberOfParticles;
+                ImGui::InputScalar("Total Particles", ImGuiDataType_U32, &totalNumberOfParticles, NULL, NULL, "%u");
+                if (oldParticleCount != totalNumberOfParticles)
+                    needsReset = true;
 
-            if (ImGui::SliderFloat("width", &simWidth, 10, 5000, "%.1f"))
-                sim.SetSimWidth(simWidth);
-            
+                // Stream parameters (only show if stream is selected)
+                if (addParticleInStream)
+                {
+                    ImGui::SliderFloat("Stream Speed", &streamSpeed, 5.0f, 50.0f, "%.1f");
 
-            const float buttonWidth = ImGui::GetContentRegionAvail().x;
-            if (ImGui::Button("Reset Simulation", ImVec2(buttonWidth, 30)))
-            {
-                ResetSimulation(sim, 0.6f, addParticleInBulk, addParticleInStream,
-                    streamSpeed, initialParticleSpeed, particleMass, totalNumberOfParticles, particleRadius);
-                needsReset = false;
-                timeManager = Time(fixedDeltaTime);
+                    // Particle initial velocity
+                    if (ImGui::InputFloat2("Initial Particle Speed", particleSpeedValues))
+                    {
+                        initialParticleSpeed.x = particleSpeedValues[0];
+                        initialParticleSpeed.y = particleSpeedValues[1];
+                        needsReset = true;
+                    }
+                }
+
+                // Substeps
+                if (ImGui::SliderInt("Substeps", &subSteps, 1, 10, "%1"))
+                    sim.SetSubSteps(subSteps);
+
+                // Simulation size
+                if (ImGui::SliderFloat("heigth", &simHeight, 10, 5000, "%.1f"))
+                    sim.SetSimHeight(simHeight);
+
+                if (ImGui::SliderFloat("width", &simWidth, 10, 5000, "%.1f"))
+                    sim.SetSimWidth(simWidth);
+
+
+                const float buttonWidth = ImGui::GetContentRegionAvail().x;
+                if (ImGui::Button("Reset Simulation", ImVec2(buttonWidth, 30)))
+                {
+                    ResetSimulation(sim, 0.6f, addParticleInBulk, addParticleInStream,
+                        streamSpeed, initialParticleSpeed, particleMass, totalNumberOfParticles, particleRadius);
+                    needsReset = false;
+                    timeManager = Time(fixedDeltaTime);
+                }
             }
 
             ImGui::Separator();
-            ImGui::Text("Rendering : ");
-            ImGui::ColorEdit4("Background color", simBGColor);
-            ImGui::ColorEdit4("Border color", simBorderColor);
-            ImGui::SliderFloat("Border Width", &borderWidth, 1.0f, 10.0f, "%.1f");
 
-            // Render type settings
-            ImGui::Text("Set rendering type:");
-            ImGui::SameLine();
-
-            bool oldRenderTemperature = renderTemperature;
-            if (ImGui::RadioButton("Velocity", !renderTemperature))
-                renderTemperature = false;
-            ImGui::SameLine();
-            if (ImGui::RadioButton("Temperature", renderTemperature))
-                renderTemperature = true;
-
-            // Not the best implementation but it works
-            if (oldRenderTemperature != renderTemperature)
+            if (ImGui::CollapsingHeader("Rendering"))
             {
-                renderVelocity = !renderTemperature;
-                activeShader = renderTemperature ? &tempShader : &velShader;
-                renderer = std::make_unique<ParticleRenderer>(sim, *activeShader, renderTemperature);
+                ImGui::ColorEdit4("Background color", simBGColor);
+                ImGui::ColorEdit4("Border color", simBorderColor);
+                ImGui::SliderFloat("Border Width", &borderWidth, 1.0f, 10.0f, "%.1f");
+
+                // Render type settings
+                ImGui::Text("Set rendering type:");
+                ImGui::SameLine();
+
+                bool oldRenderTemperature = renderTemperature;
+                if (ImGui::RadioButton("Velocity", !renderTemperature))
+                    renderTemperature = false;
+                ImGui::SameLine();
+                if (ImGui::RadioButton("Temperature", renderTemperature))
+                    renderTemperature = true;
+
+                // Not the best implementation but it works
+                if (oldRenderTemperature != renderTemperature)
+                {
+                    renderVelocity = !renderTemperature;
+                    activeShader = renderTemperature ? &tempShader : &velShader;
+                    renderer = std::make_unique<ParticleRenderer>(sim, *activeShader, renderTemperature);
+                }
             }
+            
+            ImGui::Separator();
+
+            if (ImGui::CollapsingHeader("Physics constants"))
+            {
+                // Gravity
+                float gravityValues[2] = { GRAVITY.x, GRAVITY.y };
+                if (ImGui::InputFloat2("Gravity", gravityValues))
+                {
+                    GRAVITY.x = gravityValues[0];
+                    GRAVITY.y = gravityValues[1];
+                }
+
+                // Restitution (bounce factor)
+                ImGui::SliderFloat("Restitution", &RESTITUTION, 0.0f, 1.0f, "%.3f");
+
+                // Air resistance
+                if (ImGui::SliderFloat("Air Resistance", &AIR_RESISTANCE, 0.0f, 0.1f, "%.4f"))
+                    INVERSE_AIR_RESISTANCE = (AIR_RESISTANCE > 0.0f) ? 1.0f / AIR_RESISTANCE : 0.0f;
+                
+
+                // Max velocity
+                if (ImGui::SliderFloat("Max Velocity", &MAX_VELOCITY, 50.0f, 1000.0f, "%.1f"))
+                    MAX_VELOCITY_SQ = MAX_VELOCITY * MAX_VELOCITY;
+                
+
+                // Min delta movement
+                ImGui::SliderFloat("Min Delta Movement", &MIN_DELTA_MOVEMENT, 0.001f, 0.1f, "%.4f");
+
+                // Damping factor
+                ImGui::SliderFloat("Damping Factor", &DAMPING_FACTOR, 0.0f, 2.0f, "%.3f");
+
+                // Force coefficients
+                ImGui::SliderFloat("Spacebar Force", &SPACEBAR_FORCE_COEFFICIENT, 0.0f, 2000.0f, "%.1f");
+                ImGui::SliderFloat("Left Click Force", &LEFT_CLICK_FORCE_COEFFICIENT, 0.0f, 5000.0f, "%.1f");
+                ImGui::SliderFloat("Max Force Distance Squared", &MAX_FORCE_DISTANCE_SQ, 1000.0f, 200000.0f, "%.0f");
+
+                // Heat stuff
+                ImGui::SliderFloat("Thermal Dispersion/Frame", &THERMAL_DISPERSION_PER_FRAME, 0.0f, 1.0f, "%.3f");
+                ImGui::SliderFloat("Max Thermal Diffusion/Collision", &MAX_THERMAL_DIFFUSION_PER_COLLISION, 0.0f, 50.0f, "%.1f");
+
+                // Reset to defaults button
+                if (ImGui::Button("Reset Physics Constants to Defaults", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+                {
+                    GRAVITY = { 0.0f, -50.0f };
+                    RESTITUTION = 0.8f;
+                    AIR_RESISTANCE = 0.005f;
+                    INVERSE_AIR_RESISTANCE = 1.0f / AIR_RESISTANCE;
+                    MAX_VELOCITY = 200.0f;
+                    MAX_VELOCITY_SQ = MAX_VELOCITY * MAX_VELOCITY;
+                    MIN_DELTA_MOVEMENT = 0.005f;
+                    DAMPING_FACTOR = 1.0f;
+                    SPACEBAR_FORCE_COEFFICIENT = 500.0f;
+                    LEFT_CLICK_FORCE_COEFFICIENT = 1000.0f;
+                    MAX_FORCE_DISTANCE_SQ = 50000.0f;
+                    THERMAL_DISPERSION_PER_FRAME = 0.1f;
+                    MAX_THERMAL_DIFFUSION_PER_COLLISION = 15.0f;
+                }
+            }
+
 
             ImGui::End();
             ImGui::Render();

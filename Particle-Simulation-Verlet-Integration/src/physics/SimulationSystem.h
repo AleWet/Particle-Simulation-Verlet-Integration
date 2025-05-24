@@ -126,7 +126,10 @@ public:
     }
 
     // Method to completely reset the simulation state
-    void Reset();
+    void Reset(float particleRadius);
+
+    // Method to change the masses of all the particles in the simulation
+    void UpdateMass(float newMass);
 
     // Method to get active stream count
     size_t GetActiveStreamCount() const { return m_Streams.size(); }
@@ -242,4 +245,5 @@ public:
         m_SpatialGridInitialized = false;
     }
     
+    void SetParticleRadius(float newRad) { m_ParticleRadius = newRad; m_SpatialGridInitialized = false;}
 };

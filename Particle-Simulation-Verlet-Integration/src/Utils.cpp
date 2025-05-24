@@ -313,7 +313,7 @@ void ProcessInput(GLFWwindow* window, SimulationSystem& sim, float deltaTime)
 
 // Function to reset the simulation with current parameters
 void ResetSimulation(SimulationSystem& sim, float zoom, bool bulk, bool stream, float streamSpeed, Vec2 InitialSpeed, float mass, unsigned int totalParticles, float particleRad) {
-    sim.Reset();
+    sim.Reset(particleRad);
     sim.SetZoom(zoom);
 
     if (bulk) {

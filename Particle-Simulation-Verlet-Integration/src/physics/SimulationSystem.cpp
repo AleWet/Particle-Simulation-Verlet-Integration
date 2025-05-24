@@ -207,7 +207,7 @@ void SimulationSystem::UpdateSpatialGrid()
     }
 }
 
-void SimulationSystem::Reset() {
+void SimulationSystem::Reset(float particleRadius) {
     // Clear all particles and streams
     ClearParticles();
     ClearStreams();
@@ -235,4 +235,13 @@ void SimulationSystem::Reset() {
     m_Temperatures.reserve(maxParticles);
     m_Densities.reserve(maxParticles);
     m_Pressures.reserve(maxParticles);
+
+    m_ParticleRadius = particleRadius;
+}
+
+void SimulationSystem::UpdateMass(float newMass)
+{
+    for (int i = 0; i < m_CurrentNumOfParticles; i++)
+        m_Masses[i] = newMass;
+    
 }

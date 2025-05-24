@@ -1,8 +1,6 @@
 #pragma once
 #include "vec2.h"
 
-// TBD
-
 extern Vec2 GRAVITY;
 extern float RESTITUTION;
 extern float AIR_RESISTANCE;
