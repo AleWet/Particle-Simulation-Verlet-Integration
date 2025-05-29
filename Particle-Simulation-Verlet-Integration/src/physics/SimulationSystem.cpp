@@ -28,7 +28,6 @@ SimulationSystem::~SimulationSystem() {};
 
 void SimulationSystem::AddParticle(const Vec2& position, const Vec2& velocity, const Vec2& acceleration, float mass)
 {
-    // Add to SoA vectors
     m_Positions.push_back(position);
     m_PrevPositions.push_back(position - velocity); // Calculate prev position from velocity
     m_Accelerations.push_back(acceleration);
@@ -40,10 +39,7 @@ void SimulationSystem::AddParticle(const Vec2& position, const Vec2& velocity, c
 
 void SimulationSystem::Update(float deltaTime)
 {
-    // Update particle streams
     UpdateStreams(deltaTime);
-
-    // Solve physics (apply forces, update positions, handle collisions)
     SolvePhysics(*this, deltaTime, GetIsSpaceBarPressed(), GetIsMouseLeftClicked(), GetIsMouseRightClicked());
 }
 
@@ -83,7 +79,6 @@ glm::mat4 SimulationSystem::GetProjMatrix() const
 
 glm::mat4 SimulationSystem::GetViewMatrix() const
 {
-    // Calculate simulation center 
     Vec2 simulationCenter = {
         (m_Bounds.topRight.x + m_Bounds.bottomLeft.x) * 0.5f,
         (m_Bounds.topRight.y + m_Bounds.bottomLeft.y) * 0.5f
@@ -208,7 +203,7 @@ void SimulationSystem::UpdateSpatialGrid()
 }
 
 void SimulationSystem::Reset(float particleRadius) {
-    // Clear all particles and streams
+    
     ClearParticles();
     ClearStreams();
 
@@ -243,5 +238,4 @@ void SimulationSystem::UpdateMass(float newMass)
 {
     for (int i = 0; i < m_CurrentNumOfParticles; i++)
         m_Masses[i] = newMass;
-    
 }

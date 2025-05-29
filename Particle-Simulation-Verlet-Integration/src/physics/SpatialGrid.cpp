@@ -30,7 +30,6 @@ void SpatialGrid::InitCells(std::vector<Vec2>& particlePositions)
 
 void SpatialGrid::UpdateCells(std::vector<Vec2>& particlePositions)
 {
-    // Ensure particle cell tracking array is large enough
     if (m_ParticleCells.size() < particlePositions.size()) 
     {
         size_t oldSize = m_ParticleCells.size();
@@ -38,7 +37,7 @@ void SpatialGrid::UpdateCells(std::vector<Vec2>& particlePositions)
 
         // Initialize new particles with invalid cell index
         for (size_t i = oldSize; i < m_ParticleCells.size(); i++) 
-            m_ParticleCells[i] = -1;  // Invalid 
+            m_ParticleCells[i] = -1;  
         
     }
 
@@ -71,11 +70,10 @@ void SpatialGrid::UpdateCells(std::vector<Vec2>& particlePositions)
 
 void SpatialGrid::GenerateCollisionPairs(std::vector<Vec2>& particlePositions)
 {
-    // Clear previous collision pairs
     m_CollisionPairs.clear();
 
     // Approximate number of collision pairs to expect
-    m_CollisionPairs.reserve(particlePositions.size() * 4);  // Conservative estimate
+    m_CollisionPairs.reserve(particlePositions.size() * 4);  
 
     float maxDistSq = (m_ParticleRadius * 2.0f) * (m_ParticleRadius * 2.0f);
 

@@ -14,7 +14,6 @@ struct Particle
     float density;
     float pressure;
 
-    // Updated constructor with initial velocity
     Particle(const Vec2& pos, const Vec2& initialVelocity, float m = 1.0f)
         : position(pos), acceleration(Vec2(0.0f, 0.0f)),
         mass(m), density(0.0f), pressure(0.0f), temperature(20.0f)
@@ -23,16 +22,13 @@ struct Particle
         prevPosition = position - initialVelocity;
     }
 
-    // Update particle using Verlet integration
     void UpdatePosition(float dt)
     {
         // Store current position for next integration step
         Vec2 temp = position;
 
-        // Verlet integration formula
         position = position * 2.0f - prevPosition + acceleration * (dt * dt);
 
-        // Update previous position
         prevPosition = temp;
 
         // Reset acceleration for next frame
@@ -60,7 +56,6 @@ struct Particle
     // Apply air resistance
     void ApplyDrag(float dragCoefficient, float dt)
     {
-        // Calculate current velocity for drag calculation
         Vec2 velocity = GetVelocity(dt);
         acceleration -= velocity * dragCoefficient / mass;
     }

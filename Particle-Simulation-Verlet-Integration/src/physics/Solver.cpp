@@ -174,18 +174,15 @@ void SolveParticleCollisions(SimulationSystem& sim, float deltaTime)
     const float subStepDt = deltaTime / sim.GetSubSteps();
     size_t particleCount = positions.size();
     const float diameter = sim.GetParticleRadius() * 2.0f;
-    const float responseCoef = 1.0f; // Collision response strength
+    const float responseCoef = 1.0f; // Just for debugging
 
     // Update the spatial grid in the simulation system
     sim.UpdateSpatialGrid();
 
-    // Get a reference to the spatial grid
     SpatialGrid& spatialGrid = sim.GetSpatialGrid();
 
-    // Generate all collision pairs
+    // Get coll. pairs
     spatialGrid.GenerateCollisionPairs(positions);
-
-    // Get collision pairs
     const auto& collisionPairs = spatialGrid.GetCollisionPairs();
 
     // Process collision for each pair
@@ -202,10 +199,8 @@ void SolveParticleCollisions(SimulationSystem& sim, float deltaTime)
             float dist = sqrt(distSq);
             Vec2 normal = delta / dist;
 
-            // Calculate overlap
             float overlap = diameter - dist;
 
-            // Mass ratio for collision response
             float totalMass = masses[i] + masses[j];
             float p1Ratio = masses[j] / totalMass;
             float p2Ratio = masses[i] / totalMass;

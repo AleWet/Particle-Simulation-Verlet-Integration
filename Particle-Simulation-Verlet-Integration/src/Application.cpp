@@ -29,16 +29,13 @@
 #include "vendor/imgui/imgui_impl_glfw.h"
 #include "vendor/imgui/imgui_impl_opengl3.h"
 
-// ======================= SIMULATION PARAMETERS =======================
-
-const float fixedDeltaTime = 1.0f / 60.0f; // This will probably remain an unchangeable constant
-
-// TBD
-
-
 // ======================= HARDCODED CONSTANTS =======================
-// 
-// the rendered color of the temperature ranges are:
+
+const float fixedDeltaTime = 1.0f / 60.0f;
+// The max temperature of a single particle is 400 units
+
+// --------------- TEMPERATURE AND VELOCITY RENDERING ----------------
+// The rendered color of the temperature ranges are:
 // 
 //      - Cold                  0    -   50   (black)
 //      - Starting temperature  50   -   170  (red)
@@ -46,9 +43,16 @@ const float fixedDeltaTime = 1.0f / 60.0f; // This will probably remain an uncha
 //      - High temperature      300  -   400  (yellow)
 //      - Very high temperature 400           (white)
 //
-// These cannot be changed at the moment and the simulation caps 
-// the temperature of a single particle at 400 units
-
+// 
+// The rendered color of the velocity ranges are (% of max velocity) : 
+// 
+//      - Slow                 0%    -   25%   (blue)
+//      - Medium               25%   -   50%   (gree)
+//      - Medium-Fast          50%   -   75%   (yellow)
+//      - Fast                 75%   -   100%  (red)
+// 
+// You can change these ranges in the respective shaders in the /res/shaders folder
+//
 // ===================================================================
 
 
@@ -103,11 +107,9 @@ int main(void)
 
 #pragma endregion
 
-    { //additional scope to avoid memory leaks
-
+    { 
         #pragma region Initialize simulation
       
-        // Type changes because it's useless to change the entire structure of the code just for ImGui
         float particleRadius = 2.7f;
         float particleMass = 1.0f;
         float simBorderColor[4] = { 1.0f, 1.0f, 1.0f, 0.5f };
@@ -142,7 +144,7 @@ int main(void)
         }
         else
         {
-            const unsigned int numberOfStreams = std::max(std::min(totalNumberOfParticles / 1500, 10u), 1u);
+            const unsigned int numberOfStreams = std::max(std::min(totalNumberOfParticles / 1000, 10u), 1u);
             for (int i = 0; i < numberOfStreams; i++)
                 sim.AddParticleStream(totalNumberOfParticles / numberOfStreams, streamSpeed, initialParticleSpeed, particleMass, { 10, 5 * particleRadius * i });
         }
@@ -165,7 +167,7 @@ int main(void)
         // Main loop
         while (!glfwWindowShouldClose(window))
         {
-            // Update physics before rendering 
+            // Update physics  
             if (!sim.GetIsPaused())
             {
                 int steps = timeManager.update();

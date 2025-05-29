@@ -52,19 +52,23 @@ void main()
     float normalizedV = min(speed / 25.0, 1.0);
 
     vec3 colorRGB;
-    if (normalizedV < 0.25) {
+    if (normalizedV < 0.25) 
+    {
         float t = normalizedV / 0.25;
         colorRGB = vec3(0.0, t, 1.0);
     }
-    else if (normalizedV < 0.5) {
+    else if (normalizedV < 0.5) 
+    {
         float t = (normalizedV - 0.25) / 0.25;
         colorRGB = vec3(0.0, 1.0, 1.0 - t);
     }
-    else if (normalizedV < 0.75) {
+    else if (normalizedV < 0.75)
+    {
         float t = (normalizedV - 0.5) / 0.25;
         colorRGB = vec3(t, 1.0, 0.0);
     }
-    else {
+    else 
+    {
         float t = (normalizedV - 0.75) / 0.25;
         colorRGB = vec3(1.0, 1.0 - t, 0.0);
     }
