@@ -13,7 +13,7 @@ https://github.com/user-attachments/assets/eddf0975-4d7c-405f-9e6f-a205fee8867f
 - **Verlet Integration** for physics calculations
 - **Space Partitioning** 
 - **Instance Rendering** 
-- **Customizable Simulation Parameters** (set before compilation)
+- **Customizable Simulation Parameters**
 - **GLFW & GLEW for OpenGL rendering**
 - **GLM for mathematical computations** (on top of a custom math library)
 - **ImGui** for the user interface
@@ -22,6 +22,7 @@ https://github.com/user-attachments/assets/eddf0975-4d7c-405f-9e6f-a205fee8867f
 The project requires the following libraries, all included in the `Dependencies` folder:
 - [GLFW 3.4](https://www.glfw.org/)
 - [GLEW 2.1.0](http://glew.sourceforge.net/)
+- All other libraries are included via header files in the src/vendor folder.
 
 ## Installation & Setup
 ### 1. Configure Project Properties
