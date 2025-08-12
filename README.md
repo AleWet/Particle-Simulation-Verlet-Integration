@@ -64,7 +64,7 @@ Before running the simulator, ensure the following settings are correctly config
 Most simulation parameters can be adjusted in real-time via the ImGui interface, including rendering settings and physical constants.
 
 ## Known Issues & Limitations
-- **Performance Limit:** The simulation struggles with more than **15,000 particles** with 8 substeps.
+- **Performance Limit:** The simulation struggles with more than **15,000 particles** with 8 substeps on my machine (ASUS ROG Strix G15 G512).
 - Particles aren't stable when stacked on top of each other.
 
 ## Contribution
