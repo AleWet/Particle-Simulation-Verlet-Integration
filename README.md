@@ -5,8 +5,6 @@ A lightweight C++ particle simulator built with OpenGL, designed to simulate bas
 
 
 
-https://github.com/user-attachments/assets/eddf0975-4d7c-405f-9e6f-a205fee8867f
-
 
 
 ## Features
